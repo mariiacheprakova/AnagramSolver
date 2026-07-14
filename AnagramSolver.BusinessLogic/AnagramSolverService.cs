@@ -6,6 +6,7 @@ public class AnagramSolverService : IAnagramSolver
 {
     public IList<string> GetAnagrams(Dictionary<char, int> userInputDictionary, IList<Word> listOfFileWords)
     {
+        // no linq
         List<Word> adjectives = listOfFileWords.Where(word => word.Type == "bdv").ToList();
         List<Word> nouns = listOfFileWords.Where(word => word.Type == "dkt").ToList();
         List<Word> verbs = listOfFileWords.Where(word => word.Type == "vksm").ToList();
