@@ -4,13 +4,6 @@ namespace AnagramSolver.BusinessLogic;
 
 public class AnagramSolverService : IAnagramSolver
 {
-    //private readonly IWordRepository _wordRepository;
-    //public AnagramSolverService(IWordRepository wordRepository)
-    //{
-    //     _wordRepository = wordRepository;
-    //}
-
-
     private readonly IWordRepository _wordRepository;
 
     public AnagramSolverService(IWordRepository wordRepository)
