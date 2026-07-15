@@ -1,0 +1,20 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+
+    <p>@ViewBag.Message</p>
+    <h1>Hello @ViewBag.Name</h1>
+
+</div>
+
+<h1>Anagram Solver</h1>
+<p>You entered: @ViewBag.Input</p> 
+
+<form asp-action="Index" method = "get">
+    <input type ="text" name="id" placeholder= "Enter a word"/>
+    <button type ="Submit">Search</button>
+</form>
