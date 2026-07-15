@@ -91,7 +91,7 @@
 //        IList<string> result = solver.GetAnagrams(input, words);
 
 //        // Assert
-//        result.Should().ContainSingle();
+//        result.Should().ContainSingle() ;
 //        result.Should().Contain("cab");
 //    }
 //}
