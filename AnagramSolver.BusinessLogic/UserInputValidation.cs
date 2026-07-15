@@ -6,27 +6,27 @@ using System.Text.RegularExpressions;
 
 namespace AnagramSolver.BusinessLogic;
 
-    public class UserInputValidation
+public class UserInputValidation
+{
+    private readonly AnagramSettings _settings;
+    public UserInputValidation(AnagramSettings settings)
     {
-        private readonly AnagramSettings _settings;
-        public UserInputValidation(AnagramSettings settings)
+        _settings = settings;
+    }
+
+    public bool ValidateLength(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
         {
-            _settings = settings;
-        }
-        
-        public bool ValidateLength(string input)
-        {
-            if(string.IsNullOrWhiteSpace(input))
-            {
             return false;
-            }
-            return input.Length >= _settings.MinimumWordLength;
         }
+        return input.Length >= _settings.MinimumWordLength;
+    }
 
-        public bool ValidateStringType(string input)
-        {
+    public bool ValidateStringType(string input)
+    {
         return Regex.IsMatch(input, @"^[\p{L}\s]+$");
-        }
+    }
 
-        
+
 }

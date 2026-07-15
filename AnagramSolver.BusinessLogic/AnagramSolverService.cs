@@ -4,63 +4,77 @@ namespace AnagramSolver.BusinessLogic;
 
 public class AnagramSolverService : IAnagramSolver
 {
-    public IList<string> GetAnagrams(Dictionary<char, int> userInputDictionary, IList<Word> listOfFileWords)
+    //private readonly IWordRepository _wordRepository;
+    //public AnagramSolverService(IWordRepository wordRepository)
+    //{
+    //     _wordRepository = wordRepository;
+    //}
+
+
+    private readonly IWordRepository _wordRepository;
+
+    public AnagramSolverService(IWordRepository wordRepository)
     {
-        // no linq
-        List<Word> adjectives = listOfFileWords.Where(word => word.Type == "bdv").ToList();
-        List<Word> nouns = listOfFileWords.Where(word => word.Type == "dkt").ToList();
-        List<Word> verbs = listOfFileWords.Where(word => word.Type == "vksm").ToList();
+        _wordRepository = wordRepository;
+    }
+
+    public IList<string> GetAnagrams(Dictionary<char, int> userInputDictionary)
+    {
+        var lines = _wordRepository.GetAllWords("zodynas.txt");
+        List<Word> adjectives = lines.Where(word => word.Type == "bdv").ToList();
+        List<Word> nouns = lines.Where(word => word.Type == "dkt").ToList();
+        List<Word> verbs = lines.Where(word => word.Type == "vksm").ToList();
         HashSet<string> allAnagrams = new HashSet<string>();
 
         List<Word> allWords = adjectives.Concat(nouns).Concat(verbs).GroupBy(word => new { word.Text, word.Type }).Select(group => group.First()).ToList();
 
-        FindOneWordAnagrams(userInputDictionary,allWords,allAnagrams);
+        FindOneWordAnagrams(userInputDictionary, allWords, allAnagrams);
 
-        FindTwoWordAnagrams(userInputDictionary,allWords,allAnagrams);
+        FindTwoWordAnagrams(userInputDictionary, allWords, allAnagrams);
 
-        FindThreeWordAnagrams(userInputDictionary,allWords,allAnagrams);
+        FindThreeWordAnagrams(userInputDictionary, allWords, allAnagrams);
 
 
         return allAnagrams.ToList();
     }
 
-    private void FindOneWordAnagrams(Dictionary<char, int> inputLetters,List<Word> allWords,HashSet<string> results)
+    private void FindOneWordAnagrams(Dictionary<char, int> inputLetters, List<Word> allWords, HashSet<string> results)
     {
         foreach (Word word in allWords)
         {
-            if (DictionariesAreEqual(inputLetters,word.WordLetterCount))
+            if (DictionariesAreEqual(inputLetters, word.WordLetterCount))
             {
                 results.Add(word.Text);
             }
         }
     }
 
-    private void FindTwoWordAnagrams(Dictionary<char, int> inputLetters,List<Word> allWords,HashSet<string> results)
+    private void FindTwoWordAnagrams(Dictionary<char, int> inputLetters, List<Word> allWords, HashSet<string> results)
     {
         foreach (Word firstWord in allWords)
         {
-            if (!CanUseWord(inputLetters,firstWord.WordLetterCount))
+            if (!CanUseWord(inputLetters, firstWord.WordLetterCount))
             {
                 continue;
             }
 
-            Dictionary<char, int> afterFirstWord =SubtractLetters(inputLetters,firstWord.WordLetterCount);
+            Dictionary<char, int> afterFirstWord = SubtractLetters(inputLetters, firstWord.WordLetterCount);
 
             foreach (Word secondWord in allWords)
             {
-                if (!CanUseWord(afterFirstWord,secondWord.WordLetterCount))
+                if (!CanUseWord(afterFirstWord, secondWord.WordLetterCount))
                 {
                     continue;
                 }
 
-                Dictionary<char, int> afterSecondWord =SubtractLetters(afterFirstWord,secondWord.WordLetterCount);
+                Dictionary<char, int> afterSecondWord = SubtractLetters(afterFirstWord, secondWord.WordLetterCount);
 
                 if (afterSecondWord.Count != 0)
                 {
                     continue;
                 }
 
-                string formattedResult =FormatTwoWords(firstWord, secondWord);
+                string formattedResult = FormatTwoWords(firstWord, secondWord);
 
                 results.Add(formattedResult);
             }
@@ -71,37 +85,37 @@ public class AnagramSolverService : IAnagramSolver
     {
         foreach (Word firstWord in allWords)
         {
-            if (!CanUseWord(inputLetters,firstWord.WordLetterCount))
+            if (!CanUseWord(inputLetters, firstWord.WordLetterCount))
             {
                 continue;
             }
 
-            Dictionary<char, int> afterFirstWord =SubtractLetters(inputLetters,firstWord.WordLetterCount);
+            Dictionary<char, int> afterFirstWord = SubtractLetters(inputLetters, firstWord.WordLetterCount);
 
             foreach (Word secondWord in allWords)
             {
-                if (!CanUseWord(afterFirstWord,secondWord.WordLetterCount))
+                if (!CanUseWord(afterFirstWord, secondWord.WordLetterCount))
                 {
                     continue;
                 }
 
-                Dictionary<char, int> afterSecondWord =SubtractLetters(afterFirstWord,secondWord.WordLetterCount);
+                Dictionary<char, int> afterSecondWord = SubtractLetters(afterFirstWord, secondWord.WordLetterCount);
 
                 foreach (Word thirdWord in allWords)
                 {
-                    if (!CanUseWord(afterSecondWord,thirdWord.WordLetterCount))
+                    if (!CanUseWord(afterSecondWord, thirdWord.WordLetterCount))
                     {
                         continue;
                     }
 
-                    Dictionary<char, int> afterThirdWord =SubtractLetters(afterSecondWord,thirdWord.WordLetterCount);
+                    Dictionary<char, int> afterThirdWord = SubtractLetters(afterSecondWord, thirdWord.WordLetterCount);
 
                     if (afterThirdWord.Count != 0)
                     {
                         continue;
                     }
 
-                    Word[] words ={firstWord,secondWord,thirdWord};
+                    Word[] words = { firstWord, secondWord, thirdWord };
 
                     bool hasCorrectTypes =
                         words.Count(word => word.Type == "bdv") == 1 &&
@@ -129,12 +143,12 @@ public class AnagramSolverService : IAnagramSolver
         }
     }
 
-    private bool CanUseWord(Dictionary<char, int> availableLetters,Dictionary<char, int> requiredLetters)
+    private bool CanUseWord(Dictionary<char, int> availableLetters, Dictionary<char, int> requiredLetters)
     {
-        return requiredLetters.All(requiredLetter => availableLetters.TryGetValue(requiredLetter.Key,out int availableCount) && availableCount >= requiredLetter.Value);
+        return requiredLetters.All(requiredLetter => availableLetters.TryGetValue(requiredLetter.Key, out int availableCount) && availableCount >= requiredLetter.Value);
     }
 
-    private Dictionary<char, int> SubtractLetters(Dictionary<char, int> availableLetters,Dictionary<char, int> usedLetters)
+    private Dictionary<char, int> SubtractLetters(Dictionary<char, int> availableLetters, Dictionary<char, int> usedLetters)
     {
         Dictionary<char, int> remainingLetters = new Dictionary<char, int>(availableLetters);
 
@@ -151,14 +165,14 @@ public class AnagramSolverService : IAnagramSolver
         return remainingLetters;
     }
 
-    bool DictionariesAreEqual(Dictionary<char, int> first, Dictionary<char, int> second)
+    static bool DictionariesAreEqual(Dictionary<char, int> first, Dictionary<char, int> second)
     {
-        return first.Count == second.Count && first.All(pair =>second.TryGetValue(pair.Key,out int secondValue)&& secondValue == pair.Value);
+        return first.Count == second.Count && first.All(pair => second.TryGetValue(pair.Key, out int secondValue) && secondValue == pair.Value);
     }
 
-    string FormatTwoWords(Word firstWord,Word secondWord)
+    static string FormatTwoWords(Word firstWord, Word secondWord)
     {
-        Word[] words ={firstWord,secondWord};
+        Word[] words = { firstWord, secondWord };
 
         Word? adjective = words.FirstOrDefault(word => word.Type == "bdv");
 

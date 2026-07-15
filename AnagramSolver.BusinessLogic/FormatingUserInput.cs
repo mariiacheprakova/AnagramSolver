@@ -16,9 +16,9 @@ namespace AnagramSolver.BusinessLogic
             return string.Concat(words);
         }
 
-        public Dictionary<char,int> LetterCount(string input)
+        public Dictionary<char, int> LetterCount(string input)
         {
-           return input.GroupBy(c => c).ToDictionary(group => group.Key, group => group.Count());
+            return input.GroupBy(c => c).ToDictionary(group => group.Key, group => group.Count());
 
         }
 

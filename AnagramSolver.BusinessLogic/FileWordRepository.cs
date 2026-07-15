@@ -1,13 +1,18 @@
-﻿using System.Text;
+﻿using AnagramSolver.Contracts.Models;
+using System.Text;
 
 namespace AnagramSolver.BusinessLogic;
 
-    public class FileWordRepository : IWordRepository
+public class FileWordRepository : IWordRepository
+{
+    public IList<Word> GetAllWords(string fileName)
     {
-        public IList<string> GetAllWords(string fileName)
-        {
-            string[] lines = File.ReadAllLines(fileName, Encoding.UTF8);
-            return lines.ToList();
+        string[] lines =
+            File.ReadAllLines(fileName, Encoding.UTF8);
 
-        }
+        var converter =
+            new WordFileParser();
+
+        return converter.WordObjectCreation(lines);
     }
+}

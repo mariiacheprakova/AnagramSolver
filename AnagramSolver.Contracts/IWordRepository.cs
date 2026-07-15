@@ -1,4 +1,6 @@
+using AnagramSolver.Contracts.Models;
+
 public interface IWordRepository
 {
-    IList<string> GetAllWords(string fileName);
+    IList<Word> GetAllWords(string fileName);
 }

@@ -14,6 +14,6 @@ namespace AnagramSolver.Contracts.Models
     {
         public string Text { get; set; }
         public string Type { get; set; }
-        public Dictionary<char,int> WordLetterCount { get; set; }
+        public Dictionary<char, int> WordLetterCount { get; set; }
     }
 }

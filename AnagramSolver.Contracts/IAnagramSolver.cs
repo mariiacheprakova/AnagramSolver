@@ -2,5 +2,5 @@ using AnagramSolver.Contracts.Models;
 
 public interface IAnagramSolver
 {
-    IList<string> GetAnagrams(Dictionary<char, int> userInputDictionary, IList<Word> lines);
+    IList<string> GetAnagrams(Dictionary<char, int> userInputDictionary);
 }
