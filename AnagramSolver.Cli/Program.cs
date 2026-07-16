@@ -1,8 +1,6 @@
 ﻿
 using AnagramSolver.BusinessLogic;
-using AnagramSolver.Contracts.Models;
-using Microsoft.Extensions.Configuration;
-using System.Text;
+
 
 namespace AnagramSolver.Cli
 {
@@ -14,50 +12,49 @@ namespace AnagramSolver.Cli
         {
             var settings = ConfigurationLoader.LoadAnagramSettings();
             var validator = new UserInputValidation(settings);
-            ConsoleConfiguration.ConfigureEncoding();
+            ConsoleConfiguration.ConfigureUtf8Encoding();
 
-            var input = UserInput();
+            var input = ReadValidUserInput();
 
-            string UserInput()
+            string ReadValidUserInput()
             {
 
                 Console.WriteLine("Enter a phrase: ");
-                Console.WriteLine($"Only characters allowed. Must include at least {settings.MinimumWordLength} characters.");
-                string? input = Console.ReadLine()?.Trim().ToLower();
+                Console.WriteLine($"Only letters and spaces allowed. Must include at least {settings.MinimumWordLength} characters.");
+                string? input = Console.ReadLine();
+                    
 
                 while (true)
                 {
 
-                    var isLengthValid = validator.ValidateLength(input);
-                    var isInputVariationValid = validator.ValidateStringType(input);
 
 
-                    if (!isLengthValid)
+                    if (!validator.ValidateLength(input))
                     {
                         Console.WriteLine($"Input string must be atleast {settings.MinimumWordLength} characters,");
 
                     }
-                    else if (!isInputVariationValid)
+                    else if (!validator.ContainsOnlyLettersAndWhitespace(input))
                     {
-                        Console.WriteLine("Input string must contain only characters.");
+                        Console.WriteLine("Input string must contain only spaces and letters.");
                     }
                     else
                     {
                         Console.WriteLine($"Entered string: {input}");
-                        return input;
+                        return input.Trim().ToLower();
                     }
                     Console.WriteLine("Try again.");
-                    input = Console.ReadLine()?.Trim().ToLower();
+                    input = Console.ReadLine();
 
                 }
 
             }
 
-            var repository = new FileWordRepository(); // creating IList<Word> lines
+            var repository = new FileWordRepository(); 
             var solver = new AnagramSolverService(repository);
 
             Console.WriteLine("Words are successfully uploaded from a text file.");
-            //Console.WriteLine($"Number of lines: {lines.Count}.");
+         
 
             var inputFormating = new FormatingUserInput();
             var userWords = inputFormating.StringSeparationByWords(input);
@@ -68,17 +65,11 @@ namespace AnagramSolver.Cli
             {
                 Console.WriteLine($"{i + 1}: {userWords[i]}");
             }
-            var userInputString = inputFormating.UserInputString(userWords); // user input string
+            var userInputString = inputFormating.UserInputString(userWords);
             Console.WriteLine($"Trimmed string without white spaces: {userInputString}");
 
 
-            var userInputDictionary = inputFormating.LetterCount(userInputString); // user input dict
-
-
-            //var wordsByType = new TextFileSeparatingByWordTypes();
-            //IList<Word> listOfFileWords = wordsByType.WordObjectCreation(repository);
-
-            //var anagrams = new AnagramSolverService();
+            var userInputDictionary = inputFormating.LetterCount(userInputString); 
 
             var results = solver.GetAnagrams(userInputDictionary);
 
@@ -88,15 +79,27 @@ namespace AnagramSolver.Cli
             }
             else
             {
-                Console.WriteLine($"Found overall {results.Count()} anagrams: ");
+                Console.WriteLine($"Found overall {results.Count} anagrams:");
 
-                var countToPrint = Math.Min(results.Count, settings.MaxAnagramsCount);
-                Console.WriteLine($"Maximum anagrams displayed: {countToPrint}");
-                for (int i = 0; i < countToPrint; i++)
+                int countToPrint = Math.Min(
+                    results.Count,
+                    settings.MaxAnagramsCount);
+
+                Console.WriteLine(
+                    $"Maximum anagrams displayed: {countToPrint}");
+
+                int printedCount = 0;
+
+                foreach (string result in results)
                 {
-                    Console.WriteLine(results[i]);
-                }
+                    if (printedCount >= countToPrint)
+                    {
+                        break;
+                    }
 
+                    Console.WriteLine(result);
+                    printedCount++;
+                }
             }
 
 

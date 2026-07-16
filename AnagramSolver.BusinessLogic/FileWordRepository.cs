@@ -5,14 +5,14 @@ namespace AnagramSolver.BusinessLogic;
 
 public class FileWordRepository : IWordRepository
 {
-    public IList<Word> GetAllWords(string fileName)
+    public Word[] GetAllWords(string fileName)
     {
         string[] lines =
             File.ReadAllLines(fileName, Encoding.UTF8);
 
-        var converter =
+        var parser =
             new WordFileParser();
 
-        return converter.WordObjectCreation(lines);
+        return parser.ParseWords(lines);
     }
 }

@@ -1,7 +1,4 @@
 ﻿using AnagramSolver.Contracts.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace AnagramSolver.BusinessLogic;
@@ -14,18 +11,16 @@ public class UserInputValidation
         _settings = settings;
     }
 
-    public bool ValidateLength(string input)
+    public bool ValidateLength(string? input)
     {
-        if (string.IsNullOrWhiteSpace(input))
-        {
-            return false;
-        }
-        return input.Length >= _settings.MinimumWordLength;
+        return !string.IsNullOrWhiteSpace(input)
+            && input.Length >= _settings.MinimumWordLength;
     }
 
-    public bool ValidateStringType(string input)
+    public bool ContainsOnlyLettersAndWhitespace(string? input)
     {
-        return Regex.IsMatch(input, @"^[\p{L}\s]+$");
+        return !string.IsNullOrWhiteSpace(input)
+             && Regex.IsMatch(input, @"^[\p{L}\s]+$");
     }
 
 

@@ -6,172 +6,332 @@ public class AnagramSolverService : IAnagramSolver
 {
     private readonly IWordRepository _wordRepository;
 
-    public AnagramSolverService(IWordRepository wordRepository)
+    public AnagramSolverService(IWordRepository wordRepository) // constructor 
     {
         _wordRepository = wordRepository;
     }
 
-    public IList<string> GetAnagrams(Dictionary<char, int> userInputDictionary)
+    public HashSet<string> GetAnagrams(
+        Dictionary<char, int> userInputDictionary)
     {
-        var lines = _wordRepository.GetAllWords("zodynas.txt");
-        List<Word> adjectives = lines.Where(word => word.Type == "bdv").ToList();
-        List<Word> nouns = lines.Where(word => word.Type == "dkt").ToList();
-        List<Word> verbs = lines.Where(word => word.Type == "vksm").ToList();
-        HashSet<string> allAnagrams = new HashSet<string>();
+        Word[] loadedWords =
+            _wordRepository.GetAllWords(AnagramSettings.TextFileName);
 
-        List<Word> allWords = adjectives.Concat(nouns).Concat(verbs).GroupBy(word => new { word.Text, word.Type }).Select(group => group.First()).ToList();
+        Word[] allWords = GetSupportedWords(loadedWords);
 
-        FindOneWordAnagrams(userInputDictionary, allWords, allAnagrams);
+        var results = new HashSet<string>();
 
-        FindTwoWordAnagrams(userInputDictionary, allWords, allAnagrams);
+        FindOneWordAnagrams(
+            userInputDictionary,
+            allWords);
 
-        FindThreeWordAnagrams(userInputDictionary, allWords, allAnagrams);
+        FindTwoWordAnagrams(
+            userInputDictionary,
+            allWords,
+            results);
 
+        FindThreeWordAnagrams(
+            userInputDictionary,
+            allWords,
+            results);
 
-        return allAnagrams.ToList();
+        return new HashSet<string>(results);
     }
 
-    private void FindOneWordAnagrams(Dictionary<char, int> inputLetters, List<Word> allWords, HashSet<string> results)
+    private Word[] GetSupportedWords(Word[] loadedWords)
     {
-        foreach (Word word in allWords)
-        {
-            if (DictionariesAreEqual(inputLetters, word.WordLetterCount))
-            {
-                results.Add(word.Text);
-            }
-        }
-    }
+        var temporaryWords =
+            new Word[loadedWords.Length];
 
-    private void FindTwoWordAnagrams(Dictionary<char, int> inputLetters, List<Word> allWords, HashSet<string> results)
-    {
-        foreach (Word firstWord in allWords)
+        var count = 0;
+
+        var seenWords =
+            new HashSet<string>();
+
+        foreach (Word word in loadedWords)
         {
-            if (!CanUseWord(inputLetters, firstWord.WordLetterCount))
+            bool hasSupportedType =
+                word.Type == "bdv" ||
+                word.Type == "dkt" ||
+                word.Type == "vksm";
+
+            if (!hasSupportedType)
             {
                 continue;
             }
 
-            Dictionary<char, int> afterFirstWord = SubtractLetters(inputLetters, firstWord.WordLetterCount);
+            string key = $"{word.Text}|{word.Type}";
+
+            if (!seenWords.Add(key))
+            {
+                continue;
+            }
+
+            temporaryWords[count] = word;
+            count++;
+        }
+
+        Word[] result = new Word[count];
+
+        Array.Copy(
+            temporaryWords,
+            result,
+            count);
+
+        return result;
+    }
+
+    private HashSet<Word> FindOneWordAnagrams(
+        Dictionary<char, int> inputLetters,
+        Word[] allWords)
+    {
+        var oneWordAnagrams = new HashSet<Word>();
+        foreach (Word word in allWords)
+        {
+            if (DictionariesAreEqual(
+                inputLetters,
+                word.WordLetterCount))
+            {
+                oneWordAnagrams.Add(word);
+            }
+        }
+        return oneWordAnagrams;
+    }
+
+    private void FindTwoWordAnagrams(
+        Dictionary<char, int> inputLetters,
+        Word[] allWords,
+        HashSet<string> results)
+    {
+        foreach (Word firstWord in allWords)
+        {
+            if (!CanUseWord(
+                inputLetters,
+                firstWord.WordLetterCount))
+            {
+                continue;
+            }
+
+            Dictionary<char, int> afterFirstWord =
+                SubtractLetters(
+                    inputLetters,
+                    firstWord.WordLetterCount);
 
             foreach (Word secondWord in allWords)
             {
-                if (!CanUseWord(afterFirstWord, secondWord.WordLetterCount))
+                if (!CanUseWord(
+                    afterFirstWord,
+                    secondWord.WordLetterCount))
                 {
                     continue;
                 }
 
-                Dictionary<char, int> afterSecondWord = SubtractLetters(afterFirstWord, secondWord.WordLetterCount);
+                Dictionary<char, int> afterSecondWord =
+                    SubtractLetters(
+                        afterFirstWord,
+                        secondWord.WordLetterCount);
 
                 if (afterSecondWord.Count != 0)
                 {
                     continue;
                 }
 
-                string formattedResult = FormatTwoWords(firstWord, secondWord);
+                string formattedResult =
+                    FormatTwoWords(firstWord, secondWord);
 
                 results.Add(formattedResult);
             }
         }
     }
 
-    private void FindThreeWordAnagrams(Dictionary<char, int> inputLetters, List<Word> allWords, HashSet<string> results)
+    private void FindThreeWordAnagrams(
+        Dictionary<char, int> inputLetters,
+        Word[] allWords,
+        HashSet<string> results)
     {
         foreach (Word firstWord in allWords)
         {
-            if (!CanUseWord(inputLetters, firstWord.WordLetterCount))
+            if (!CanUseWord(
+                inputLetters,
+                firstWord.WordLetterCount))
             {
                 continue;
             }
 
-            Dictionary<char, int> afterFirstWord = SubtractLetters(inputLetters, firstWord.WordLetterCount);
+            Dictionary<char, int> afterFirstWord =
+                SubtractLetters(
+                    inputLetters,
+                    firstWord.WordLetterCount);
 
             foreach (Word secondWord in allWords)
             {
-                if (!CanUseWord(afterFirstWord, secondWord.WordLetterCount))
+                if (!CanUseWord(
+                    afterFirstWord,
+                    secondWord.WordLetterCount))
                 {
                     continue;
                 }
 
-                Dictionary<char, int> afterSecondWord = SubtractLetters(afterFirstWord, secondWord.WordLetterCount);
+                Dictionary<char, int> afterSecondWord =
+                    SubtractLetters(
+                        afterFirstWord,
+                        secondWord.WordLetterCount);
 
                 foreach (Word thirdWord in allWords)
                 {
-                    if (!CanUseWord(afterSecondWord, thirdWord.WordLetterCount))
+                    if (!CanUseWord(
+                        afterSecondWord,
+                        thirdWord.WordLetterCount))
                     {
                         continue;
                     }
 
-                    Dictionary<char, int> afterThirdWord = SubtractLetters(afterSecondWord, thirdWord.WordLetterCount);
+                    Dictionary<char, int> afterThirdWord =
+                        SubtractLetters(
+                            afterSecondWord,
+                            thirdWord.WordLetterCount);
 
                     if (afterThirdWord.Count != 0)
                     {
                         continue;
                     }
 
-                    Word[] words = { firstWord, secondWord, thirdWord };
+                    string formattedResult;
 
                     bool hasCorrectTypes =
-                        words.Count(word => word.Type == "bdv") == 1 &&
-                        words.Count(word => word.Type == "dkt") == 1 &&
-                        words.Count(word => word.Type == "vksm") == 1;
+                        TryFormatThreeWords(
+                            firstWord,
+                            secondWord,
+                            thirdWord,
+                            out formattedResult);
 
                     if (!hasCorrectTypes)
                     {
                         continue;
                     }
 
-                    Word adjective =
-                        words.Single(word => word.Type == "bdv");
-
-                    Word noun =
-                        words.Single(word => word.Type == "dkt");
-
-                    Word verb =
-                        words.Single(word => word.Type == "vksm");
-
-                    results.Add(
-                        $"{adjective.Text} {noun.Text} {verb.Text}");
+                    results.Add(formattedResult);
                 }
             }
         }
     }
 
-    private bool CanUseWord(Dictionary<char, int> availableLetters, Dictionary<char, int> requiredLetters)
+    private bool CanUseWord(
+        Dictionary<char, int> availableLetters,
+        Dictionary<char, int> requiredLetters)
     {
-        return requiredLetters.All(requiredLetter => availableLetters.TryGetValue(requiredLetter.Key, out int availableCount) && availableCount >= requiredLetter.Value);
+        foreach (
+            KeyValuePair<char, int> requiredLetter
+            in requiredLetters)
+        {
+            int availableCount;
+
+            bool letterExists =
+                availableLetters.TryGetValue(
+                    requiredLetter.Key,
+                    out availableCount);
+
+            if (!letterExists)
+            {
+                return false;
+            }
+
+            if (availableCount < requiredLetter.Value)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
-    private Dictionary<char, int> SubtractLetters(Dictionary<char, int> availableLetters, Dictionary<char, int> usedLetters)
+    private Dictionary<char, int> SubtractLetters(
+        Dictionary<char, int> availableLetters,
+        Dictionary<char, int> usedLetters)
     {
-        Dictionary<char, int> remainingLetters = new Dictionary<char, int>(availableLetters);
+        var remainingLetters =
+            new Dictionary<char, int>(availableLetters);
 
-        foreach (var usedLetter in usedLetters)
+        foreach (
+            KeyValuePair<char, int> usedLetter
+            in usedLetters)
         {
-            remainingLetters[usedLetter.Key] -= usedLetter.Value;
+            remainingLetters[usedLetter.Key] -=
+                usedLetter.Value;
 
             if (remainingLetters[usedLetter.Key] == 0)
             {
-                remainingLetters.Remove(usedLetter.Key);
+                remainingLetters.Remove(
+                    usedLetter.Key);
             }
         }
 
         return remainingLetters;
     }
 
-    static bool DictionariesAreEqual(Dictionary<char, int> first, Dictionary<char, int> second)
+    private bool DictionariesAreEqual(
+        Dictionary<char, int> first,
+        Dictionary<char, int> second)
     {
-        return first.Count == second.Count && first.All(pair => second.TryGetValue(pair.Key, out int secondValue) && secondValue == pair.Value);
+        if (first.Count != second.Count)
+        {
+            return false;
+        }
+
+        foreach (
+            KeyValuePair<char, int> pair
+            in first)
+        {
+            int secondValue;
+
+            bool letterExists =
+                second.TryGetValue(
+                    pair.Key,
+                    out secondValue);
+
+            if (!letterExists)
+            {
+                return false;
+            }
+
+            if (secondValue != pair.Value)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
-    static string FormatTwoWords(Word firstWord, Word secondWord)
+    private string FormatTwoWords(
+        Word firstWord,
+        Word secondWord)
     {
-        Word[] words = { firstWord, secondWord };
+        Word? adjective = null;
+        Word? noun = null;
+        Word? verb = null;
 
-        Word? adjective = words.FirstOrDefault(word => word.Type == "bdv");
+        Word[] words =
+        {
+            firstWord,
+            secondWord
+        };
 
-        Word? noun = words.FirstOrDefault(word => word.Type == "dkt");
-
-        Word? verb = words.FirstOrDefault(word => word.Type == "vksm");
+        foreach (Word word in words)
+        {
+            if (word.Type == "bdv")
+            {
+                adjective = word;
+            }
+            else if (word.Type == "dkt")
+            {
+                noun = word;
+            }
+            else if (word.Type == "vksm")
+            {
+                verb = word;
+            }
+        }
 
         if (adjective != null && noun != null)
         {
@@ -189,5 +349,70 @@ public class AnagramSolverService : IAnagramSolver
         }
 
         return $"{firstWord.Text} {secondWord.Text}";
+    }
+
+    private bool TryFormatThreeWords(
+        Word firstWord,
+        Word secondWord,
+        Word thirdWord,
+        out string formattedResult)
+    {
+        Word? adjective = null;
+        Word? noun = null;
+        Word? verb = null;
+
+        Word[] words =
+        {
+            firstWord,
+            secondWord,
+            thirdWord
+        };
+
+        foreach (Word word in words)
+        {
+            if (word.Type == "bdv")
+            {
+                if (adjective != null)
+                {
+                    formattedResult = string.Empty;
+                    return false;
+                }
+
+                adjective = word;
+            }
+            else if (word.Type == "dkt")
+            {
+                if (noun != null)
+                {
+                    formattedResult = string.Empty;
+                    return false;
+                }
+
+                noun = word;
+            }
+            else if (word.Type == "vksm")
+            {
+                if (verb != null)
+                {
+                    formattedResult = string.Empty;
+                    return false;
+                }
+
+                verb = word;
+            }
+        }
+
+        if (adjective == null ||
+            noun == null ||
+            verb == null)
+        {
+            formattedResult = string.Empty;
+            return false;
+        }
+
+        formattedResult =
+            $"{adjective.Text} {noun.Text} {verb.Text}";
+
+        return true;
     }
 }
