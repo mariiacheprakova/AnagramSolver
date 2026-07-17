@@ -1,0 +1,12 @@
+﻿@model AnagramSolver.WebApp.Models.WordsViewModel
+
+<h1>Words</h1>
+
+<p>Page @Model.CurrentPage of @Model.TotalPages</p>
+
+<ul>
+    @foreach(var word in Model.Words)
+    {
+        <li>@word</li>
+    }
+</ul>

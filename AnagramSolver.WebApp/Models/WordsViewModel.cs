@@ -1,8 +1,10 @@
 ﻿namespace AnagramSolver.WebApp.Models;
 
+using AnagramSolver.Contracts.Models;
+
     public class WordsViewModel
     {
-    public IReadOnlyCollection<string> Words { get; set; } = Array.Empty<string>();
+    public IReadOnlyCollection<Word> Words { get; set; } 
     public int CurrentPage { get; set; }
     public int TotalPages { get; set; }
 

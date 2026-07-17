@@ -15,27 +15,21 @@ public class AnagramSolverService : IAnagramSolver
         Dictionary<char, int> userInputDictionary)
     {
         Word[] loadedWords =
-            _wordRepository.GetAllWords(AnagramSettings.TextFileName);
+            _wordRepository.GetAllWords();
 
-        Word[] allWords = GetSupportedWords(loadedWords);
+        Word[] allWords = GetSupportedWords(loadedWords); //pick only adj verbs and nouns
 
         var results = new HashSet<string>();
 
-        FindOneWordAnagrams(
-            userInputDictionary,
-            allWords);
+        var threeWordAnagrams = FindThreeWordAnagrams(userInputDictionary, allWords);
+        var twoWordAnagrams = FindTwoWordAnagrams(userInputDictionary, allWords);
+        var oneWordAnagrams = FindOneWordAnagrams(userInputDictionary, allWords);
 
-        FindTwoWordAnagrams(
-            userInputDictionary,
-            allWords,
-            results);
+        results.UnionWith(threeWordAnagrams);
+        results.UnionWith(twoWordAnagrams);
+        results.UnionWith(threeWordAnagrams);
 
-        FindThreeWordAnagrams(
-            userInputDictionary,
-            allWords,
-            results);
-
-        return new HashSet<string>(results);
+        return results;
     }
 
     private Word[] GetSupportedWords(Word[] loadedWords)
@@ -81,28 +75,28 @@ public class AnagramSolverService : IAnagramSolver
         return result;
     }
 
-    private HashSet<Word> FindOneWordAnagrams(
+    private HashSet<string> FindOneWordAnagrams(
         Dictionary<char, int> inputLetters,
         Word[] allWords)
     {
-        var oneWordAnagrams = new HashSet<Word>();
+        var oneWordAnagrams = new HashSet<string>();
         foreach (Word word in allWords)
         {
             if (DictionariesAreEqual(
                 inputLetters,
                 word.WordLetterCount))
             {
-                oneWordAnagrams.Add(word);
+                oneWordAnagrams.Add(word.Text);
             }
         }
         return oneWordAnagrams;
     }
 
-    private void FindTwoWordAnagrams(
+    private HashSet<string> FindTwoWordAnagrams(
         Dictionary<char, int> inputLetters,
-        Word[] allWords,
-        HashSet<string> results)
+        Word[] allWords)
     {
+        var twoWordAnagrams = new HashSet<string>();
         foreach (Word firstWord in allWords)
         {
             if (!CanUseWord(
@@ -139,16 +133,17 @@ public class AnagramSolverService : IAnagramSolver
                 string formattedResult =
                     FormatTwoWords(firstWord, secondWord);
 
-                results.Add(formattedResult);
+                twoWordAnagrams.Add(formattedResult);
             }
         }
+        return twoWordAnagrams;
     }
 
-    private void FindThreeWordAnagrams(
+    private HashSet<string> FindThreeWordAnagrams(
         Dictionary<char, int> inputLetters,
-        Word[] allWords,
-        HashSet<string> results)
+        Word[] allWords)
     {
+        var threeWordAnagrams = new HashSet<string>();
         foreach (Word firstWord in allWords)
         {
             if (!CanUseWord(
@@ -210,10 +205,11 @@ public class AnagramSolverService : IAnagramSolver
                         continue;
                     }
 
-                    results.Add(formattedResult);
+                    threeWordAnagrams.Add(formattedResult);
                 }
             }
         }
+        return threeWordAnagrams;
     }
 
     private bool CanUseWord(

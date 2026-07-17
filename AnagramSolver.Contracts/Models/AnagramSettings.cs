@@ -4,7 +4,7 @@
     {
         public int MaxAnagramsCount { get; set; }
         public int MinimumWordLength { get; set; }
-        public int TextFileName { get; set; }
+        public string TextFileName { get; set; } = string.Empty;
 
 
     }

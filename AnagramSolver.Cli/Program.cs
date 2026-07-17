@@ -48,7 +48,7 @@ namespace AnagramSolver.Cli
 
             }
 
-            var repository = new FileWordRepository(); 
+            var repository = new FileWordRepository(settings); 
             var solver = new AnagramSolverService(repository);
 
             Console.WriteLine("Words are successfully uploaded from a text file.");

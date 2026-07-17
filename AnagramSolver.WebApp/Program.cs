@@ -1,8 +1,17 @@
 using AnagramSolver.BusinessLogic;
-using AnagramSolver.Contracts;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using AnagramSolver.Contracts.Models;
+using Microsoft.Extensions.Configuration;
+
 
 var builder = WebApplication.CreateBuilder(args);
+
+AnagramSettings settings =
+    builder.Configuration
+    .GetSection("AnagramSettings")
+    .Get<AnagramSettings>()
+    ?? throw new InvalidOperationException(
+        "AnagramSettings configuration is missing.");
+builder.Services.AddSingleton(settings);
 
 // Add services to the container.// knows how to create controllerds, views, ..
 builder.Services.AddControllersWithViews();

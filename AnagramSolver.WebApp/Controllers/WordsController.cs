@@ -1,7 +1,6 @@
-﻿using AnagramSolver.BusinessLogic;
-using AnagramSolver.WebApp.Models;
+﻿using AnagramSolver.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Runtime.CompilerServices;
+
 
 namespace AnagramSolver.WebApp.Controllers;
 
@@ -10,25 +9,34 @@ namespace AnagramSolver.WebApp.Controllers;
         private const int PageSize = 100;
         private readonly IWordRepository _wordRepository;
 
-        public WordsController(IWordRepository FileWordRepository)
+        public WordsController(IWordRepository wordRepository)
         {
-            _wordRepository = FileWordRepository;
-        }
-
+            _wordRepository = wordRepository;
+        } // constructor
+        //    The controller declares
+        //I require an object that fulfils the IWordRepository contract
+        //ASP.NET obtains the registered implementation from the DI container and supplies it to the constructor.
 
         public IActionResult Index(int page = 1)
         {
+           var allWords = _wordRepository.GetAllWords();
            if(page < 1)
            {
             page = 1;
            }
+  
             int totalPages = (int)Math.Ceiling(
-            Words.Count / (double)PageSize);
+            allWords.Length / (double)PageSize);
 
-            var wordsForCurrentPage = Words
+            if(totalPages > 0 && page > totalPages)
+            {
+                page = totalPages;
+            }
+
+            var wordsForCurrentPage = allWords
                 .Skip((page - 1) * PageSize)
                 .Take(PageSize)
-                .ToArray();
+                .ToArray(); 
 
             var model = new WordsViewModel
             {
