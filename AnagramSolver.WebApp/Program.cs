@@ -1,5 +1,6 @@
 using AnagramSolver.BusinessLogic;
 using AnagramSolver.Contracts;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,7 +28,12 @@ app.MapStaticAssets(); //wwwroot - css, js, make them available
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}") // routing rule + setting default id - optional
-    .WithStaticAssets();
 
+    .WithStaticAssets();
+//GET requests retrieve information.They should not modify data.
+//POST is used when data changes.
+
+
+//"The application follows the MVC pattern and the principle of Separation of Concerns. The controller coordinates requests, the service contains the business logic, the repository manages data access, the ViewModel transports data to the View, and the View is responsible solely for presentation. This organisation keeps the code modular, maintainable, and easier to test."
 
 app.Run();
