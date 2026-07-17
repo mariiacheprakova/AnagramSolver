@@ -11,7 +11,7 @@ public class AnagramSolverService : IAnagramSolver
         _wordRepository = wordRepository;
     }
 
-    public HashSet<string> GetAnagrams(
+    public IReadOnlyCollection<string> GetAnagrams(
         Dictionary<char, int> userInputDictionary)
     {
         Word[] loadedWords =

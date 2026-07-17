@@ -24,6 +24,8 @@
         placeholder="Enter a word: " />
     <button type ="Submit">Search</button>
 </form>
+
+
 @if (Model.Anagrams.Count > 0)
 {
     <h2>Anagrams for "@Model.Input"</h2>
@@ -34,6 +36,10 @@
         }
     </ul>
 }
+
+<a asp-controller="Words" asp-action="Index">
+    View all words
+</a>
 
 
 @* <form asp-action="Index" method = "get">

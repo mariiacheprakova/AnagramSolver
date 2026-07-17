@@ -17,6 +17,7 @@ builder.Services.AddSingleton(settings);
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IWordRepository, FileWordRepository>();
 builder.Services.AddScoped<IAnagramSolver, AnagramSolverService>();
+builder.Services.AddScoped<LetterCounter>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

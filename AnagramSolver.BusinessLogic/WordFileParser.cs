@@ -48,7 +48,7 @@ public class WordFileParser
         return result;
     }
 
-    private Dictionary<char, int> CountLetters(string text)
+    public Dictionary<char, int> CountLetters(string text)
     {
         var letterCount =
             new Dictionary<char, int>();
