@@ -27,8 +27,6 @@ namespace AnagramSolver.Cli
                 while (true)
                 {
 
-
-
                     if (!validator.ValidateLength(input))
                     {
                         Console.WriteLine($"Input string must be atleast {settings.MinimumWordLength} characters,");
