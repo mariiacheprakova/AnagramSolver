@@ -1,4 +1,7 @@
-﻿@{
+﻿@model AnagramSolver.WebApp.Models.AnagramViewModel
+
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
@@ -14,7 +17,28 @@
 <h1>Anagram Solver</h1>
 <p>You entered: @ViewBag.Input</p> 
 
-<form asp-action="Index" method = "get">
-    <input type ="text" name="id" placeholder= "Enter a word"/>
+
+<form asp-action="Index" method="get"> 
+    <input
+        type ="text"
+        name="id"
+        value="@Model.Input"
+        placeholder="Enter a word: " />
     <button type ="Submit">Search</button>
 </form>
+@if (Model.Anagrams.Count > 0)
+{
+    <h2>Anagrams for "@Model.Input"</h2>
+    <ul>
+        @foreach(string anagram in Model.Anagrams)
+        {
+            <li>@anagram</li>
+        }
+    </ul>
+}
+
+
+@* <form asp-action="Index" method = "get">
+    <input type ="text" name="id" placeholder= "Enter a word"/>
+    <button type ="Submit">Search</button>
+</form> *@

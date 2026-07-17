@@ -16,15 +16,23 @@ namespace AnagramSolver.WebApp.Controllers
 
         private readonly IAnagramSolver _anagramSolver;
 
-        public HomeController(IAnagramSolver anagramSolver)
+        public HomeController(IAnagramSolver anagramSolver) // DEPENDENCY INJECTION -- a dependency of homecontroller. homecontroller needs it to perform a job. Controller doesnt need to construct anything it just orders it to be created  builder.Services.AddScoped<IAnagramSolver, AnagramSolverService>(); - this tells asp.net to create a anagramSolverService 
         {
             _anagramSolver = anagramSolver;
         }
-
+        //"Dependency Injection is a design pattern where an object receives the dependencies it needs instead of creating them itself. In ASP.NET Core, the built-in DI container creates and injects those dependencies based on the registrations in Program.cs."
+        //"Constructor injection makes the controller depend on abstractions rather than concrete implementations. The controller only receives the services it needs and focuses on coordinating the request. The DI container is responsible for creating and supplying those services."
         public IActionResult Index(string? id)
         {
-            ViewBag.Input = id;
-            return View();
+            var model = new AnagramViewModel()
+            {
+                Input = id
+            };
+            if(!string.IsNullOrWhiteSpace(id))
+            {
+                model.Anagrams = (IReadOnlyCollection<string>)_anagramSolver.GetAnagrams(id);
+            }
+            return View(model);
         }
         public IActionResult Privacy()
         {
