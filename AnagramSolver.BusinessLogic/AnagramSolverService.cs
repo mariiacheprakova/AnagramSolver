@@ -11,11 +11,14 @@ public class AnagramSolverService : IAnagramSolver
         _wordRepository = wordRepository;
     }
 
-    public IReadOnlyCollection<string> GetAnagrams(
-        Dictionary<char, int> userInputDictionary)
+    public async Task<IReadOnlyCollection<string>> GetAnagramsAsync(
+        Dictionary<char, int> userInputDictionary,CancellationToken cancellationToken=default)
     {
-        Word[] loadedWords =
-            _wordRepository.GetAllWords();
+        Word[] loadedWords = await
+            _wordRepository.GetAllWordsAsync(cancellationToken);
+
+        cancellationToken.ThrowIfCancellationRequested();
+
 
         Word[] allWords = GetSupportedWords(loadedWords); //pick only adj verbs and nouns
 
@@ -27,7 +30,7 @@ public class AnagramSolverService : IAnagramSolver
 
         results.UnionWith(threeWordAnagrams);
         results.UnionWith(twoWordAnagrams);
-        results.UnionWith(threeWordAnagrams);
+        results.UnionWith(oneWordAnagrams);
 
         return results;
     }

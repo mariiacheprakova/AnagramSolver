@@ -25,7 +25,7 @@ namespace AnagramSolver.WebApp.Controllers
         }
         //"Dependency Injection is a design pattern where an object receives the dependencies it needs instead of creating them itself. In ASP.NET Core, the built-in DI container creates and injects those dependencies based on the registrations in Program.cs."
         //"Constructor injection makes the controller depend on abstractions rather than concrete implementations. The controller only receives the services it needs and focuses on coordinating the request. The DI container is responsible for creating and supplying those services."
-        public IActionResult Index(string? id)
+        public async  Task<IActionResult> Index(string? id,CancellationToken cancellationToken)
         {
             var model = new AnagramViewModel()
             {
@@ -34,7 +34,7 @@ namespace AnagramSolver.WebApp.Controllers
             if(!string.IsNullOrWhiteSpace(id))
             {
                 var idToDictionary = _letterCounter.CountLetters(id);
-                model.Anagrams = _anagramSolver.GetAnagrams(idToDictionary);
+                model.Anagrams = await _anagramSolver.GetAnagramsAsync(idToDictionary,cancellationToken);
             }
             return View(model);
         }

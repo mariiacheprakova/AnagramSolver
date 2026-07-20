@@ -1,4 +1,4 @@
 public interface IAnagramSolver
 {
-    IReadOnlyCollection<string> GetAnagrams(Dictionary<char, int> userInputDictionary);
+    Task<IReadOnlyCollection<string>> GetAnagramsAsync(Dictionary<char, int> userInputDictionary,CancellationToken cancellationToken = default);
 }

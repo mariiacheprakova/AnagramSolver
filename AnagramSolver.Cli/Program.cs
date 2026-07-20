@@ -1,75 +1,94 @@
-﻿
-using AnagramSolver.BusinessLogic;
-
+﻿using AnagramSolver.BusinessLogic;
 
 namespace AnagramSolver.Cli
 {
-
-
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            var settings = ConfigurationLoader.LoadAnagramSettings();
-            var validator = new UserInputValidation(settings);
+            var settings =
+                ConfigurationLoader.LoadAnagramSettings();
+
+            var validator =
+                new UserInputValidation(settings);
+
             ConsoleConfiguration.ConfigureUtf8Encoding();
 
             var input = ReadValidUserInput();
 
             string ReadValidUserInput()
             {
-
                 Console.WriteLine("Enter a phrase: ");
-                Console.WriteLine($"Only letters and spaces allowed. Must include at least {settings.MinimumWordLength} characters.");
+
+                Console.WriteLine(
+                    $"Only letters and spaces allowed. " +
+                    $"Must include at least " +
+                    $"{settings.MinimumWordLength} characters.");
+
                 string? input = Console.ReadLine();
-                    
 
                 while (true)
                 {
-
                     if (!validator.ValidateLength(input))
                     {
-                        Console.WriteLine($"Input string must be atleast {settings.MinimumWordLength} characters,");
-
+                        Console.WriteLine(
+                            $"Input string must be at least " +
+                            $"{settings.MinimumWordLength} characters.");
                     }
-                    else if (!validator.ContainsOnlyLettersAndWhitespace(input))
+                    else if (
+                        !validator.ContainsOnlyLettersAndWhitespace(input))
                     {
-                        Console.WriteLine("Input string must contain only spaces and letters.");
+                        Console.WriteLine(
+                            "Input string must contain only spaces and letters.");
                     }
                     else
                     {
                         Console.WriteLine($"Entered string: {input}");
-                        return input.Trim().ToLower();
+
+                        return input!
+                            .Trim()
+                            .ToLower();
                     }
+
                     Console.WriteLine("Try again.");
                     input = Console.ReadLine();
-
                 }
-
             }
 
-            var repository = new FileWordRepository(settings); 
-            var solver = new AnagramSolverService(repository);
+            var repository =
+                new FileWordRepository(settings);
 
-            Console.WriteLine("Words are successfully uploaded from a text file.");
-         
+            var solver =
+                new AnagramSolverService(repository);
 
-            var inputFormating = new FormatingUserInput();
-            var userWords = inputFormating.StringSeparationByWords(input);
+            Console.WriteLine(
+                "Words are successfully uploaded from a text file.");
 
-            Console.WriteLine($"String contains {userWords.Length} words.");
+            var inputFormating =
+                new FormatingUserInput();
+
+            var userWords =
+                inputFormating.StringSeparationByWords(input);
+
+            Console.WriteLine(
+                $"String contains {userWords.Length} words.");
 
             for (int i = 0; i < userWords.Length; i++)
             {
                 Console.WriteLine($"{i + 1}: {userWords[i]}");
             }
-            var userInputString = inputFormating.UserInputString(userWords);
-            Console.WriteLine($"Trimmed string without white spaces: {userInputString}");
 
+            var userInputString =
+                inputFormating.UserInputString(userWords);
 
-            var userInputDictionary = inputFormating.LetterCount(userInputString); 
+            Console.WriteLine(
+                $"Trimmed string without white spaces: {userInputString}");
 
-            var results = solver.GetAnagrams(userInputDictionary);
+            var userInputDictionary =
+                inputFormating.LetterCount(userInputString);
+
+            var results =
+                await solver.GetAnagramsAsync(userInputDictionary);
 
             if (results.Count == 0)
             {
@@ -77,7 +96,8 @@ namespace AnagramSolver.Cli
             }
             else
             {
-                Console.WriteLine($"Found overall {results.Count} anagrams:");
+                Console.WriteLine(
+                    $"Found overall {results.Count} anagrams:");
 
                 int countToPrint = Math.Min(
                     results.Count,
@@ -99,10 +119,6 @@ namespace AnagramSolver.Cli
                     printedCount++;
                 }
             }
-
-
-
         }
     }
-
 }

@@ -10,10 +10,11 @@ public class FileWordRepository : IWordRepository
     {
         _settings = settings;
     }
-    public Word[] GetAllWords()
+    public async Task<Word[]> GetAllWordsAsync(CancellationToken cancellationToken = default
+        )
     {
-        string[] lines =
-            File.ReadAllLines(_settings.TextFileName, Encoding.UTF8);
+        string[] lines = await
+            File.ReadAllLinesAsync(_settings.TextFileName, Encoding.UTF8,cancellationToken);
 
         var parser =
             new WordFileParser();

@@ -8,11 +8,14 @@ RUN dotnet restore AnagramSolver.WebApp/AnagramSolver.WebApp.csproj
 
 RUN dotnet publish AnagramSolver.WebApp/AnagramSolver.WebApp.csproj -c Release -o /app/publish --no-restore
 
+
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 
 WORKDIR /app
 
 COPY --from=build /app/publish .
+
+COPY zodynas.txt .
 
 EXPOSE 8080
 

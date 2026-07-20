@@ -2,5 +2,5 @@ using AnagramSolver.Contracts.Models;
 
 public interface IWordRepository
 {
-    Word[] GetAllWords();
+    Task<Word[]> GetAllWordsAsync(CancellationToken cancellationToken = default);
 }
