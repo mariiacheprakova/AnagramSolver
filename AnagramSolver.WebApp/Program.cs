@@ -1,7 +1,5 @@
 using AnagramSolver.BusinessLogic;
 using AnagramSolver.Contracts.Models;
-using Microsoft.Extensions.Configuration;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,16 +7,28 @@ AnagramSettings settings =
     builder.Configuration
     .GetSection("AnagramSettings")
     .Get<AnagramSettings>()
+
     ?? throw new InvalidOperationException(
         "AnagramSettings configuration is missing.");
 builder.Services.AddSingleton(settings);
 
 // Add services to the container.// knows how to create controllerds, views, ..
 builder.Services.AddControllersWithViews();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+//Swagger is a tool that automatically generates interactive documentation for an API and allows developers to test endpoints without writing client code.
+
 builder.Services.AddScoped<IWordRepository, FileWordRepository>();
 builder.Services.AddScoped<IAnagramSolver, AnagramSolverService>();
 builder.Services.AddScoped<LetterCounter>();
+
+
 var app = builder.Build();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment()) // not developing locally
@@ -30,6 +40,7 @@ if (!app.Environment.IsDevelopment()) // not developing locally
 
 app.UseHttpsRedirection(); // security
 app.UseRouting(); // construct url like /home/index
+
 
 app.UseAuthorization(); // logins and permissions
 
@@ -45,5 +56,5 @@ app.MapControllerRoute(
 
 
 //"The application follows the MVC pattern and the principle of Separation of Concerns. The controller coordinates requests, the service contains the business logic, the repository manages data access, the ViewModel transports data to the View, and the View is responsible solely for presentation. This organisation keeps the code modular, maintainable, and easier to test."
-
+app.MapControllers();
 app.Run();
