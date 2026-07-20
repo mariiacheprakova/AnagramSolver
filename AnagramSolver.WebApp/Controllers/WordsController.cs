@@ -17,9 +17,9 @@ namespace AnagramSolver.WebApp.Controllers;
         //I require an object that fulfils the IWordRepository contract
         //ASP.NET obtains the registered implementation from the DI container and supplies it to the constructor.
 
-        public IActionResult Index(int page = 1)
+        public async Task<IActionResult> Index(CancellationToken cancellationToken,int page = 1)
         {
-           var allWords = _wordRepository.GetAllWords();
+           var allWords = await _wordRepository.GetAllWordsAsync(cancellationToken);
            if(page < 1)
            {
             page = 1;
