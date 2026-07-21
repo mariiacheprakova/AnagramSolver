@@ -40,6 +40,21 @@
 <a asp-controller="Words" asp-action="Index">
     View all words
 </a>
+@if(!string.IsNullOrWhiteSpace(ViewBag.LastSearch as string))
+{
+    <p>Last search: @ViewBag.LastSearch</p>
+}
+
+@if (ViewBag.SearchHistory is List<string> searchHistory && searchHistory.Count > 0)
+{
+    <h3>Search history</h3>
+    <ul>
+        @foreach (var search in searchHistory)
+        {
+            <li>@search</li>
+        }
+    </ul>
+}
 
 
 @* <form asp-action="Index" method = "get">

@@ -12,29 +12,28 @@ public class AnagramSolverServiceMockTests
     private readonly Mock<IWordRepository> _repository = new();
 
     [Fact]
-    public void GetAnagrams_ShouldReturnEmpty_WhenInputIsEmpty()
+    //Method_ShouldExpectedBehaviour_WhenCondition - name convention
+    public async Task GetAnagramsAsync_ShouldReturnEmpty_WhenInputIsEmpty()
     {
-
+        // Arrange
         _repository
-            .Setup(r => r.GetAllWords(It.IsAny<string>()))
-            .Returns(new List<Word>());
+            .Setup(r => r.GetAllWordsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Array.Empty<Word>());
 
         var solver = new AnagramSolverService(_repository.Object);
         var input = new Dictionary<char, int>();
 
-        var result = solver.GetAnagrams(input);
+        // Act
+        var result = await solver.GetAnagramsAsync(input);
+
+        //Assert
         Assert.Empty(result);
     }
 
     [Fact]
-    public void GetAnagrams_ShouldReturnEmpty_WhenNoAnagramsExist()
+    public async Task GetAnagramsAsync_ShouldReturnEmpty_WhenNoAnagramsExist()
     {
-
-        _repository
-            .Setup(r => r.GetAllWords(It.IsAny<string>()))
-            .Returns(new List<Word>());
-
-        var solver = new AnagramSolverService(_repository.Object);
+        // Arrange
         var input = new Dictionary<char, int>
         {
             ['a'] = 1,
@@ -42,8 +41,8 @@ public class AnagramSolverServiceMockTests
             ['c'] = 1
         };
 
-        var words = new List<Word>
-        {
+        Word[] words =
+        [
             new Word
             {
                 Text = "dog",
@@ -55,18 +54,26 @@ public class AnagramSolverServiceMockTests
                     ['g']=1
                 }
             }
-        };
+        ];
 
-        var result = solver.GetAnagrams(input);
+        _repository
+            .Setup(r => r.GetAllWordsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(words);
+
+        var solver = new AnagramSolverService(_repository.Object);
+
+        // Act
+        var result = await solver.GetAnagramsAsync(input);
+
+        // Assert
         result.Should().BeEmpty();
     }
 
     [Fact]
-    public void GetAnagrams_ShouldReturnOneWordAnagram_WhenExactMatchExists()
+    public async Task GetAnagramsAsync_ShouldReturnOneWordAnagram_WhenExactMatchExists()
     {
 
-
-        var solver = new AnagramSolverService(_repository.Object);
+        // Arrange
         var input = new Dictionary<char, int>
         {
             ['a'] = 1,
@@ -75,8 +82,8 @@ public class AnagramSolverServiceMockTests
         };
 
 
-        var words = new List<Word>
-            {
+        Word[] words =
+            [
                 new Word
                 {
                     Text = "cab",
@@ -88,13 +95,17 @@ public class AnagramSolverServiceMockTests
                         ['c']=1
                     }
                 }
-            };
+            ];
         _repository
-           .Setup(r => r.GetAllWords(It.IsAny<string>()))
-           .Returns(words);
+           .Setup(r => r.GetAllWordsAsync(It.IsAny<CancellationToken>()))
+           .ReturnsAsync(words);
 
-        var result = solver.GetAnagrams(input);
+        var solver = new AnagramSolverService(_repository.Object);
 
+        // Act
+        var result = await solver.GetAnagramsAsync(input);
+
+        // Assert
         Assert.Single(result);
         Assert.Contains("cab", result);
     }

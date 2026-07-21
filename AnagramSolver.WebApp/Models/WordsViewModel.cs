@@ -2,8 +2,8 @@
 
 using AnagramSolver.Contracts.Models;
 
-    public class WordsViewModel
-    {
+public class WordsViewModel
+{
     public IReadOnlyCollection<Word> Words { get; set; } = Array.Empty<Word>();
     public int CurrentPage { get; set; }
     public int TotalPages { get; set; }

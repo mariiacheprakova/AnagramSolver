@@ -1,7 +1,5 @@
 using AnagramSolver.BusinessLogic;
 using AnagramSolver.Contracts.Models;
-using Microsoft.Extensions.Configuration;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,16 +7,31 @@ AnagramSettings settings =
     builder.Configuration
     .GetSection("AnagramSettings")
     .Get<AnagramSettings>()
+
     ?? throw new InvalidOperationException(
         "AnagramSettings configuration is missing.");
+
 builder.Services.AddSingleton(settings);
 
 // Add services to the container.// knows how to create controllerds, views, ..
 builder.Services.AddControllersWithViews();
-builder.Services.AddScoped<IWordRepository, FileWordRepository>();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+//Swagger is a tool that automatically generates interactive documentation for an API and allows developers to test endpoints without writing client code.
+
+builder.Services.AddSingleton<IWordRepository, FileWordRepository>();
 builder.Services.AddScoped<IAnagramSolver, AnagramSolverService>();
 builder.Services.AddScoped<LetterCounter>();
+builder.Services.AddSession();// registers the session service
+
+
+
 var app = builder.Build();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment()) // not developing locally
@@ -30,9 +43,12 @@ if (!app.Environment.IsDevelopment()) // not developing locally
 
 app.UseHttpsRedirection(); // security
 app.UseRouting(); // construct url like /home/index
+app.UseSession(); //enables it for incoming http requests
+
 
 app.UseAuthorization(); // logins and permissions
 
+app.MapControllers();
 app.MapStaticAssets(); //wwwroot - css, js, make them available
 
 app.MapControllerRoute(

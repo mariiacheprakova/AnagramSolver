@@ -2,6 +2,8 @@ using AnagramSolver.BusinessLogic;
 using AnagramSolver.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Text.Json;
+
 
 namespace AnagramSolver.WebApp.Controllers
 {
@@ -25,17 +27,39 @@ namespace AnagramSolver.WebApp.Controllers
         }
         //"Dependency Injection is a design pattern where an object receives the dependencies it needs instead of creating them itself. In ASP.NET Core, the built-in DI container creates and injects those dependencies based on the registrations in Program.cs."
         //"Constructor injection makes the controller depend on abstractions rather than concrete implementations. The controller only receives the services it needs and focuses on coordinating the request. The DI container is responsible for creating and supplying those services."
-        public async  Task<IActionResult> Index(string? id,CancellationToken cancellationToken)
+        //An API controller is a controller that handles HTTP requests and returns data, rather than rendering HTML views
+        public async Task<IActionResult> Index(string? id, CancellationToken cancellationToken)
         {
             var model = new AnagramViewModel()
             {
                 Input = id
             };
-            if(!string.IsNullOrWhiteSpace(id))
+
+            var historyJson = HttpContext.Session.GetString("searchHistory");
+            var searchHistory = string.IsNullOrWhiteSpace(historyJson)
+                ? new List<string>()
+                : JsonSerializer.Deserialize<List<string>>(historyJson)
+                    ?? new List<string>();
+
+            if (!string.IsNullOrWhiteSpace(id))
             {
+                Response.Cookies.Append("lastSearch", id, new CookieOptions
+                {
+                    Expires = DateTimeOffset.Now.AddDays(30)
+                });
+
+                searchHistory.Add(id);
+                var updatedHistoryJson = JsonSerializer.Serialize(searchHistory);
+                HttpContext.Session.SetString("searchHistory", updatedHistoryJson);
+
                 var idToDictionary = _letterCounter.CountLetters(id);
-                model.Anagrams = await _anagramSolver.GetAnagramsAsync(idToDictionary,cancellationToken);
+                model.Anagrams = await _anagramSolver.GetAnagramsAsync(idToDictionary, cancellationToken);
             }
+
+
+            var lastSearch = Request.Cookies["lastSearch"];
+            ViewBag.LastSearch = lastSearch;
+            ViewBag.SearchHistory = searchHistory;
             return View(model);
         }
         public IActionResult Privacy()
