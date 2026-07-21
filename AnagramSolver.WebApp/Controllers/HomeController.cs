@@ -2,6 +2,8 @@ using AnagramSolver.BusinessLogic;
 using AnagramSolver.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Text.Json;
+
 
 namespace AnagramSolver.WebApp.Controllers
 {
@@ -32,11 +34,32 @@ namespace AnagramSolver.WebApp.Controllers
             {
                 Input = id
             };
+
+            var historyJson = HttpContext.Session.GetString("searchHistory");
+            var searchHistory = string.IsNullOrWhiteSpace(historyJson)
+                ? new List<string>()
+                : JsonSerializer.Deserialize<List<string>>(historyJson)
+                    ?? new List<string>();
+
             if(!string.IsNullOrWhiteSpace(id))
             {
+                Response.Cookies.Append("lastSearch",id,new CookieOptions
+                {
+                    Expires = DateTimeOffset.Now.AddDays(30)
+                });
+
+                searchHistory.Add(id);
+                var updatedHistoryJson = JsonSerializer.Serialize(searchHistory);
+                HttpContext.Session.SetString("searchHistory", updatedHistoryJson);
+
                 var idToDictionary = _letterCounter.CountLetters(id);
                 model.Anagrams = await _anagramSolver.GetAnagramsAsync(idToDictionary,cancellationToken);
             }
+     
+
+            var lastSearch = Request.Cookies["lastSearch"];
+            ViewBag.LastSearch = lastSearch;
+            ViewBag.SearchHistory = searchHistory;
             return View(model);
         }
         public IActionResult Privacy()

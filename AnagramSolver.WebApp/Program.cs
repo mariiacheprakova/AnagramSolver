@@ -10,6 +10,7 @@ AnagramSettings settings =
 
     ?? throw new InvalidOperationException(
         "AnagramSettings configuration is missing.");
+
 builder.Services.AddSingleton(settings);
 
 // Add services to the container.// knows how to create controllerds, views, ..
@@ -21,6 +22,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IWordRepository, FileWordRepository>();
 builder.Services.AddScoped<IAnagramSolver, AnagramSolverService>();
 builder.Services.AddScoped<LetterCounter>();
+builder.Services.AddSession();// registers the session service
+
 
 
 var app = builder.Build();
@@ -40,6 +43,7 @@ if (!app.Environment.IsDevelopment()) // not developing locally
 
 app.UseHttpsRedirection(); // security
 app.UseRouting(); // construct url like /home/index
+app.UseSession(); //enables it for incoming http requests
 
 
 app.UseAuthorization(); // logins and permissions
