@@ -22,7 +22,13 @@ public class AnagramsController: ControllerBase
     public async Task<ActionResult<IReadOnlyCollection<string>>> GetAnagramsAsync(string word,CancellationToken cancellationToken)
     
     {
-            var wordDictionary = _letterCounter.CountLetters(word);
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var userAgent = Request.Headers["User-Agent"].ToString();
+        var method = Request.Method;
+        var path = Request.Path;
+        var query = Request.QueryString;
+
+        var wordDictionary = _letterCounter.CountLetters(word);
             var anagrams = await _anagramSolver.GetAnagramsAsync(wordDictionary, cancellationToken);
             return Ok(anagrams);
     }
