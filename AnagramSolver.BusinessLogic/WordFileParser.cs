@@ -31,6 +31,7 @@ public class WordFileParser
             {
                 Text = wordText,
                 Type = wordType,
+                Id = count + 1,
                 WordLetterCount = CountLetters(wordText)
             };
 

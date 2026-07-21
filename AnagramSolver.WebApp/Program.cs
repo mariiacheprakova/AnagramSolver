@@ -44,6 +44,7 @@ app.UseRouting(); // construct url like /home/index
 
 app.UseAuthorization(); // logins and permissions
 
+app.MapControllers();
 app.MapStaticAssets(); //wwwroot - css, js, make them available
 
 app.MapControllerRoute(
@@ -56,5 +57,5 @@ app.MapControllerRoute(
 
 
 //"The application follows the MVC pattern and the principle of Separation of Concerns. The controller coordinates requests, the service contains the business logic, the repository manages data access, the ViewModel transports data to the View, and the View is responsible solely for presentation. This organisation keeps the code modular, maintainable, and easier to test."
-app.MapControllers();
+
 app.Run();

@@ -12,6 +12,7 @@
     {
         public string Text { get; set; } //= string.Empty;
         public string Type { get; set; }
+        public int Id { get; set; }
         public Dictionary<char, int> WordLetterCount { get; set; }
     }
 }
