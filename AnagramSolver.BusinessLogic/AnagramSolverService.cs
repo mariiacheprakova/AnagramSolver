@@ -12,7 +12,7 @@ public class AnagramSolverService : IAnagramSolver
     }
 
     public async Task<IReadOnlyCollection<string>> GetAnagramsAsync(
-        Dictionary<char, int> userInputDictionary,CancellationToken cancellationToken=default)
+        Dictionary<char, int> userInputDictionary, CancellationToken cancellationToken = default)
     {
         Word[] loadedWords = await
             _wordRepository.GetAllWordsAsync(cancellationToken);

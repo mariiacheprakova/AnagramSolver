@@ -19,7 +19,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 //Swagger is a tool that automatically generates interactive documentation for an API and allows developers to test endpoints without writing client code.
 
-builder.Services.AddScoped<IWordRepository, FileWordRepository>();
+builder.Services.AddSingleton<IWordRepository, FileWordRepository>();
 builder.Services.AddScoped<IAnagramSolver, AnagramSolverService>();
 builder.Services.AddScoped<LetterCounter>();
 builder.Services.AddSession();// registers the session service

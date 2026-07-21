@@ -30,7 +30,7 @@ namespace AnagramSolver.Cli
 
 
 
-               
+
 
                 //var repository =
                 //    new FileWordRepository(settings);
@@ -97,7 +97,7 @@ namespace AnagramSolver.Cli
                     }
                 }
             }
-            catch(HttpRequestException exception)
+            catch (HttpRequestException exception)
             {
                 Console.WriteLine($"Could not contact the API: {exception.Message}");
             }

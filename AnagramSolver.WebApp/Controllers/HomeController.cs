@@ -28,7 +28,7 @@ namespace AnagramSolver.WebApp.Controllers
         //"Dependency Injection is a design pattern where an object receives the dependencies it needs instead of creating them itself. In ASP.NET Core, the built-in DI container creates and injects those dependencies based on the registrations in Program.cs."
         //"Constructor injection makes the controller depend on abstractions rather than concrete implementations. The controller only receives the services it needs and focuses on coordinating the request. The DI container is responsible for creating and supplying those services."
         //An API controller is a controller that handles HTTP requests and returns data, rather than rendering HTML views
-        public async  Task<IActionResult> Index(string? id,CancellationToken cancellationToken)
+        public async Task<IActionResult> Index(string? id, CancellationToken cancellationToken)
         {
             var model = new AnagramViewModel()
             {
@@ -41,9 +41,9 @@ namespace AnagramSolver.WebApp.Controllers
                 : JsonSerializer.Deserialize<List<string>>(historyJson)
                     ?? new List<string>();
 
-            if(!string.IsNullOrWhiteSpace(id))
+            if (!string.IsNullOrWhiteSpace(id))
             {
-                Response.Cookies.Append("lastSearch",id,new CookieOptions
+                Response.Cookies.Append("lastSearch", id, new CookieOptions
                 {
                     Expires = DateTimeOffset.Now.AddDays(30)
                 });
@@ -53,9 +53,9 @@ namespace AnagramSolver.WebApp.Controllers
                 HttpContext.Session.SetString("searchHistory", updatedHistoryJson);
 
                 var idToDictionary = _letterCounter.CountLetters(id);
-                model.Anagrams = await _anagramSolver.GetAnagramsAsync(idToDictionary,cancellationToken);
+                model.Anagrams = await _anagramSolver.GetAnagramsAsync(idToDictionary, cancellationToken);
             }
-     
+
 
             var lastSearch = Request.Cookies["lastSearch"];
             ViewBag.LastSearch = lastSearch;

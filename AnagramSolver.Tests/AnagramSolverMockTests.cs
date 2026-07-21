@@ -15,7 +15,7 @@ public class AnagramSolverServiceMockTests
     //Method_ShouldExpectedBehaviour_WhenCondition - name convention
     public async Task GetAnagramsAsync_ShouldReturnEmpty_WhenInputIsEmpty()
     {
-
+        // Arrange
         _repository
             .Setup(r => r.GetAllWordsAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(Array.Empty<Word>());
@@ -23,15 +23,18 @@ public class AnagramSolverServiceMockTests
         var solver = new AnagramSolverService(_repository.Object);
         var input = new Dictionary<char, int>();
 
+        // Act
         var result = await solver.GetAnagramsAsync(input);
+
+        //Assert
         Assert.Empty(result);
     }
 
     [Fact]
     public async Task GetAnagramsAsync_ShouldReturnEmpty_WhenNoAnagramsExist()
     {
-
-         var input = new Dictionary<char, int>
+        // Arrange
+        var input = new Dictionary<char, int>
         {
             ['a'] = 1,
             ['b'] = 1,
@@ -52,14 +55,17 @@ public class AnagramSolverServiceMockTests
                 }
             }
         ];
-        
+
         _repository
             .Setup(r => r.GetAllWordsAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(words);
 
         var solver = new AnagramSolverService(_repository.Object);
-      
+
+        // Act
         var result = await solver.GetAnagramsAsync(input);
+
+        // Assert
         result.Should().BeEmpty();
     }
 
@@ -67,7 +73,7 @@ public class AnagramSolverServiceMockTests
     public async Task GetAnagramsAsync_ShouldReturnOneWordAnagram_WhenExactMatchExists()
     {
 
-      
+        // Arrange
         var input = new Dictionary<char, int>
         {
             ['a'] = 1,
@@ -92,12 +98,14 @@ public class AnagramSolverServiceMockTests
             ];
         _repository
            .Setup(r => r.GetAllWordsAsync(It.IsAny<CancellationToken>()))
-           .ReturnsAsync(words); 
+           .ReturnsAsync(words);
 
         var solver = new AnagramSolverService(_repository.Object);
 
+        // Act
         var result = await solver.GetAnagramsAsync(input);
 
+        // Assert
         Assert.Single(result);
         Assert.Contains("cab", result);
     }
