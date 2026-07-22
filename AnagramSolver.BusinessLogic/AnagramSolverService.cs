@@ -5,15 +5,24 @@ namespace AnagramSolver.BusinessLogic;
 public class AnagramSolverService : IAnagramSolver
 {
     private readonly IWordRepository _wordRepository;
+    private readonly MemoryCache<IReadOnlyCollection<string>> _cache;
 
-    public AnagramSolverService(IWordRepository wordRepository) // constructor 
+    public AnagramSolverService(IWordRepository wordRepository, MemoryCache<IReadOnlyCollection<string>> cache) // constructor 
     {
         _wordRepository = wordRepository;
+        _cache = cache;
     }
 
     public async Task<IReadOnlyCollection<string>> GetAnagramsAsync(
         Dictionary<char, int> userInputDictionary,CancellationToken cancellationToken=default)
     {
+        string key = CreateCacheKey(userInputDictionary);
+
+        if(_cache.TryGet(key, out var cachedResult))
+        {
+            return cachedResult;
+        }
+
         Word[] loadedWords = await
             _wordRepository.GetAllWordsAsync(cancellationToken);
 
@@ -23,14 +32,17 @@ public class AnagramSolverService : IAnagramSolver
         Word[] allWords = GetSupportedWords(loadedWords); //pick only adj verbs and nouns
 
         var results = new HashSet<string>();
-
         var threeWordAnagrams = FindThreeWordAnagrams(userInputDictionary, allWords);
         var twoWordAnagrams = FindTwoWordAnagrams(userInputDictionary, allWords);
         var oneWordAnagrams = FindOneWordAnagrams(userInputDictionary, allWords);
-
+        
+ 
         results.UnionWith(threeWordAnagrams);
         results.UnionWith(twoWordAnagrams);
         results.UnionWith(oneWordAnagrams);
+
+        _cache.Set(key,results);
+
 
         return results;
     }
@@ -413,5 +425,24 @@ public class AnagramSolverService : IAnagramSolver
             $"{adjective.Text} {noun.Text} {verb.Text}";
 
         return true;
+    }
+
+    private string CreateCacheKey(
+    Dictionary<char, int> userInputDictionary)
+    {
+        var letters = userInputDictionary.Keys.ToArray();
+
+        Array.Sort(letters);
+
+        var key = string.Empty;
+
+        foreach (char letter in letters)
+        {
+            int count = userInputDictionary[letter];
+
+            key += $"{letter}:{count}|";
+        }
+
+        return key;
     }
 }

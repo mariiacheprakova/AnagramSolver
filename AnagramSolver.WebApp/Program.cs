@@ -22,6 +22,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IWordRepository, FileWordRepository>();
 builder.Services.AddScoped<IAnagramSolver, AnagramSolverService>();
 builder.Services.AddScoped<LetterCounter>();
+builder.Services.AddSingleton<MemoryCache<IReadOnlyCollection<string>>>();
 builder.Services.AddSession();// registers the session service
 
 
