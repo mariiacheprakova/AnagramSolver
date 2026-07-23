@@ -20,7 +20,11 @@ public class AnagramSolverServiceMockTests
             .Setup(r => r.GetAllWordsAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(Array.Empty<Word>());
 
-        var solver = new AnagramSolverService(_repository.Object);
+        var cache = new MemoryCache<IReadOnlyCollection<string>>();
+
+        var solver = new AnagramSolverService(
+            _repository.Object,
+            cache);
         var input = new Dictionary<char, int>();
 
         var result = await solver.GetAnagramsAsync(input);
@@ -31,7 +35,7 @@ public class AnagramSolverServiceMockTests
     public async Task GetAnagramsAsync_ShouldReturnEmpty_WhenNoAnagramsExist()
     {
 
-         var input = new Dictionary<char, int>
+        var input = new Dictionary<char, int>
         {
             ['a'] = 1,
             ['b'] = 1,
@@ -52,13 +56,17 @@ public class AnagramSolverServiceMockTests
                 }
             }
         ];
-        
+
         _repository
             .Setup(r => r.GetAllWordsAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(words);
 
-        var solver = new AnagramSolverService(_repository.Object);
-      
+        var cache = new MemoryCache<IReadOnlyCollection<string>>();
+
+        var solver = new AnagramSolverService(
+            _repository.Object,
+            cache);
+
         var result = await solver.GetAnagramsAsync(input);
         result.Should().BeEmpty();
     }
@@ -67,7 +75,7 @@ public class AnagramSolverServiceMockTests
     public async Task GetAnagramsAsync_ShouldReturnOneWordAnagram_WhenExactMatchExists()
     {
 
-      
+
         var input = new Dictionary<char, int>
         {
             ['a'] = 1,
@@ -92,9 +100,13 @@ public class AnagramSolverServiceMockTests
             ];
         _repository
            .Setup(r => r.GetAllWordsAsync(It.IsAny<CancellationToken>()))
-           .ReturnsAsync(words); 
+           .ReturnsAsync(words);
 
-        var solver = new AnagramSolverService(_repository.Object);
+        var cache = new MemoryCache<IReadOnlyCollection<string>>();
+
+        var solver = new AnagramSolverService(
+            _repository.Object,
+            cache);
 
         var result = await solver.GetAnagramsAsync(input);
 

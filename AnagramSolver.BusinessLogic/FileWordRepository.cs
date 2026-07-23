@@ -14,7 +14,7 @@ public class FileWordRepository : IWordRepository
         )
     {
         string[] lines = await
-            File.ReadAllLinesAsync(_settings.TextFileName, Encoding.UTF8,cancellationToken);
+            File.ReadAllLinesAsync(_settings.TextFileName, Encoding.UTF8, cancellationToken);
 
         var parser =
             new WordFileParser();
@@ -22,7 +22,7 @@ public class FileWordRepository : IWordRepository
         return parser.ParseWords(lines);
     }
 
-    public async Task<Word?> GetWordByIdAsync(int id,CancellationToken cancellationToken=default)
+    public async Task<Word?> GetWordByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         Word[] words = await GetAllWordsAsync(cancellationToken);
         return words.FirstOrDefault(word => word.Id == id);
@@ -58,7 +58,7 @@ public class FileWordRepository : IWordRepository
         return word;
     }
 
-    public async Task<bool> DeleteWordByIdAsync(int id, CancellationToken cancellationToken=default)
+    public async Task<bool> DeleteWordByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         Word[] words =
         await GetAllWordsAsync(cancellationToken);

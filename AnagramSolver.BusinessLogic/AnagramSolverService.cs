@@ -1,5 +1,4 @@
 ﻿using AnagramSolver.Contracts.Models;
-
 namespace AnagramSolver.BusinessLogic;
 
 public class AnagramSolverService : IAnagramSolver
@@ -14,11 +13,11 @@ public class AnagramSolverService : IAnagramSolver
     }
 
     public async Task<IReadOnlyCollection<string>> GetAnagramsAsync(
-        Dictionary<char, int> userInputDictionary,CancellationToken cancellationToken=default)
+        Dictionary<char, int> userInputDictionary, CancellationToken cancellationToken = default)
     {
         string key = CreateCacheKey(userInputDictionary);
 
-        if(_cache.TryGet(key, out var cachedResult))
+        if (_cache.TryGet(key, out var cachedResult))
         {
             return cachedResult;
         }
@@ -35,13 +34,13 @@ public class AnagramSolverService : IAnagramSolver
         var threeWordAnagrams = FindThreeWordAnagrams(userInputDictionary, allWords);
         var twoWordAnagrams = FindTwoWordAnagrams(userInputDictionary, allWords);
         var oneWordAnagrams = FindOneWordAnagrams(userInputDictionary, allWords);
-        
- 
+
+
         results.UnionWith(threeWordAnagrams);
         results.UnionWith(twoWordAnagrams);
         results.UnionWith(oneWordAnagrams);
 
-        _cache.Set(key,results);
+        _cache.Set(key, results);
 
 
         return results;
