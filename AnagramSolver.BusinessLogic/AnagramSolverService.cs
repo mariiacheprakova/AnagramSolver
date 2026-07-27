@@ -15,12 +15,7 @@ public class AnagramSolverService : IAnagramSolver
     public async Task<IReadOnlyCollection<string>> GetAnagramsAsync(
         Dictionary<char, int> userInputDictionary, CancellationToken cancellationToken = default)
     {
-        string key = CreateCacheKey(userInputDictionary);
 
-        if (_cache.TryGet(key, out var cachedResult))
-        {
-            return cachedResult;
-        }
 
         Word[] loadedWords = await
             _wordRepository.GetAllWordsAsync(cancellationToken);
@@ -40,7 +35,7 @@ public class AnagramSolverService : IAnagramSolver
         results.UnionWith(twoWordAnagrams);
         results.UnionWith(oneWordAnagrams);
 
-        _cache.Set(key, results);
+
 
 
         return results;
@@ -424,24 +419,5 @@ public class AnagramSolverService : IAnagramSolver
             $"{adjective.Text} {noun.Text} {verb.Text}";
 
         return true;
-    }
-
-    private string CreateCacheKey(
-    Dictionary<char, int> userInputDictionary)
-    {
-        var letters = userInputDictionary.Keys.ToArray();
-
-        Array.Sort(letters);
-
-        var key = string.Empty;
-
-        foreach (char letter in letters)
-        {
-            int count = userInputDictionary[letter];
-
-            key += $"{letter}:{count}|";
-        }
-
-        return key;
     }
 }

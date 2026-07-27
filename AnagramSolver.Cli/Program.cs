@@ -1,5 +1,8 @@
 ﻿using AnagramSolver.BusinessLogic;
+using AnagramSolver.Contracts;
 using System.Net.Http.Json;
+using System.Runtime.CompilerServices;
+
 
 namespace AnagramSolver.Cli;
 
@@ -7,6 +10,7 @@ class Program
 {
     static async Task Main(string[] args)
     {
+        ILogger logger = new Logging();
         var settings =
             ConfigurationLoader.LoadAnagramSettings();
 
@@ -34,18 +38,18 @@ class Program
 
             if (results.Count == 0)
             {
-                Console.WriteLine("No anagrams were found.");
+                logger.Log("No anagrams were found.");
             }
             else
             {
-                Console.WriteLine(
+                logger.Log(
                     $"Found overall {results.Count} anagrams:");
 
                 int countToPrint = Math.Min(
                     results.Count,
                     settings.MaxAnagramsCount);
 
-                Console.WriteLine(
+                logger.Log(
                     $"Maximum anagrams displayed: {countToPrint}");
 
                 int printedCount = 0;
@@ -57,22 +61,22 @@ class Program
                         break;
                     }
 
-                    Console.WriteLine(result);
+                    logger.Log(result);
                     printedCount++;
                 }
             }
         }
         catch (HttpRequestException exception)
         {
-            Console.WriteLine(
+            logger.Log(
                 $"Could not contact the API: {exception.Message}");
         }
 
         string ReadValidUserInput()
         {
-            Console.WriteLine("Enter a phrase:");
+            logger.Log("Enter a phrase:");
 
-            Console.WriteLine(
+            logger.Log(
                 $"Only letters and spaces allowed. " +
                 $"Must include at least " +
                 $"{settings.MinimumWordLength} characters.");
@@ -83,25 +87,25 @@ class Program
             {
                 if (!validator.ValidateLength(input))
                 {
-                    Console.WriteLine(
+                    logger.Log(
                         $"Input string must be at least " +
                         $"{settings.MinimumWordLength} characters.");
                 }
                 else if (!validator.ContainsOnlyLettersAndWhitespace(input))
                 {
-                    Console.WriteLine(
+                    logger.Log(
                         "Input string must contain only spaces and letters.");
                 }
                 else
                 {
-                    Console.WriteLine($"Entered string: {input}");
+                    logger.Log($"Entered string: {input}");
 
                     return input!
                         .Trim()
                         .ToLower();
                 }
 
-                Console.WriteLine("Try again.");
+                logger.Log("Try again.");
                 input = Console.ReadLine();
             }
         }
