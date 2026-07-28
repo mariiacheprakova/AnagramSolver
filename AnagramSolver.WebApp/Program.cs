@@ -1,5 +1,9 @@
 using AnagramSolver.BusinessLogic;
+using AnagramSolver.BusinessLogic.Decorators;
+using AnagramSolver.BusinessLogic.Filters;
+using AnagramSolver.Contracts;
 using AnagramSolver.Contracts.Models;
+using ILogger = AnagramSolver.Contracts.ILogger;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,54 +17,96 @@ AnagramSettings settings =
 
 builder.Services.AddSingleton(settings);
 
-// Add services to the container.// knows how to create controllerds, views, ..
+// MVC + Swagger
 builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-//Swagger is a tool that automatically generates interactive documentation for an API and allows developers to test endpoints without writing client code.
 
+// Services
 builder.Services.AddScoped<IWordRepository, FileWordRepository>();
-builder.Services.AddScoped<IAnagramSolver, AnagramSolverService>();
 builder.Services.AddScoped<LetterCounter>();
-builder.Services.AddSingleton<MemoryCache<IReadOnlyCollection<string>>>();
-builder.Services.AddSession();// registers the session service
 
+// Cache
+builder.Services.AddSingleton<
+    MemoryCache<IReadOnlyCollection<string>>>();
 
+// Logger
+builder.Services.AddSingleton<AnagramSolver.Contracts.ILogger, Logging>();
+
+// AnagramSolver with Chain of Responsibility + Decorators
+builder.Services.AddScoped<IAnagramSolver>(static serviceProvider =>
+{
+    IWordRepository repository =
+        serviceProvider.GetRequiredService<IWordRepository>();
+
+    ILogger logger =
+        serviceProvider.GetRequiredService<ILogger>();
+
+    MemoryCache<IReadOnlyCollection<string>> cache =
+        serviceProvider.GetRequiredService<
+            MemoryCache<IReadOnlyCollection<string>>>();
+
+    var lengthFilter =
+        new LengthFilter();
+
+    var letterFilter =
+        new LetterFilter();
+
+    var supportedWordTypeFilter =
+        new SupportedWordTypeFilter();
+
+    lengthFilter.SetNext(letterFilter);
+    letterFilter.SetNext(supportedWordTypeFilter);
+        
+    IAnagramSolver solver =
+        new AnagramSolverService(
+            repository,
+            lengthFilter);
+
+    solver =
+        new CacheDecorator(
+            solver,
+            cache);
+
+    solver =
+        new LoggingDecorator(
+            logger,
+            solver);
+
+    return solver;
+});
+
+builder.Services.AddSession();
 
 var app = builder.Build();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment()) // not developing locally
+if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
-app.UseHttpsRedirection(); // security
-app.UseRouting(); // construct url like /home/index
-app.UseSession(); //enables it for incoming http requests
+app.UseHttpsRedirection();
 
+app.UseRouting();
 
-app.UseAuthorization(); // logins and permissions
+app.UseSession();
+
+app.UseAuthorization();
 
 app.MapControllers();
-app.MapStaticAssets(); //wwwroot - css, js, make them available
+
+app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}") // routing rule + setting default id - optional
-
+    pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
-//GET requests retrieve information.They should not modify data.
-//POST is used when data changes.
-
-
-//"The application follows the MVC pattern and the principle of Separation of Concerns. The controller coordinates requests, the service contains the business logic, the repository manages data access, the ViewModel transports data to the View, and the View is responsible solely for presentation. This organisation keeps the code modular, maintainable, and easier to test."
 
 app.Run();

@@ -1,6 +1,7 @@
 ﻿using Xunit;
 using FluentAssertions;
 using AnagramSolver.BusinessLogic;
+using AnagramSolver.Contracts;
 using AnagramSolver.Contracts.Models;
 using Moq;
 
@@ -8,109 +9,136 @@ namespace AnagramSolver.Tests;
 
 public class AnagramSolverServiceMockTests
 {
-
     private readonly Mock<IWordRepository> _repository = new();
+    private readonly Mock<IWordFilter> _filterChain = new();
+
+    public AnagramSolverServiceMockTests()
+    {
+        _filterChain
+            .Setup(filter => filter.Handle(
+                It.IsAny<Word>(),
+                It.IsAny<Dictionary<char, int>>()))
+            .Returns(true);
+    }
 
     [Fact]
-    //Method_ShouldExpectedBehaviour_WhenCondition - name convention
     public async Task GetAnagramsAsync_ShouldReturnEmpty_WhenInputIsEmpty()
     {
-
+        // Arrange
         _repository
-            .Setup(r => r.GetAllWordsAsync(It.IsAny<CancellationToken>()))
+            .Setup(repository =>
+                repository.GetAllWordsAsync(
+                    It.IsAny<CancellationToken>()))
             .ReturnsAsync(Array.Empty<Word>());
 
-        var cache = new MemoryCache<IReadOnlyCollection<string>>();
+        var solver =
+            new AnagramSolverService(
+                _repository.Object,
+                _filterChain.Object);
 
-        var solver = new AnagramSolverService(
-            _repository.Object,
-            cache);
-        var input = new Dictionary<char, int>();
+        var input =
+            new Dictionary<char, int>();
 
-        var result = await solver.GetAnagramsAsync(input);
-        Assert.Empty(result);
+        // Act
+        IReadOnlyCollection<string> result =
+            await solver.GetAnagramsAsync(input);
+
+        // Assert
+        result.Should().BeEmpty();
     }
 
     [Fact]
     public async Task GetAnagramsAsync_ShouldReturnEmpty_WhenNoAnagramsExist()
     {
-
-        var input = new Dictionary<char, int>
-        {
-            ['a'] = 1,
-            ['b'] = 1,
-            ['c'] = 1
-        };
+        // Arrange
+        var input =
+            new Dictionary<char, int>
+            {
+                ['a'] = 1,
+                ['b'] = 1,
+                ['c'] = 1
+            };
 
         Word[] words =
         [
             new Word
             {
                 Text = "dog",
-                Type = "bdv",
-                WordLetterCount = new Dictionary<char,int>
-                {
-                    ['d']=1,
-                    ['o']=1,
-                    ['g']=1
-                }
+                Type = "dkt",
+                WordLetterCount =
+                    new Dictionary<char, int>
+                    {
+                        ['d'] = 1,
+                        ['o'] = 1,
+                        ['g'] = 1
+                    }
             }
         ];
 
         _repository
-            .Setup(r => r.GetAllWordsAsync(It.IsAny<CancellationToken>()))
+            .Setup(repository =>
+                repository.GetAllWordsAsync(
+                    It.IsAny<CancellationToken>()))
             .ReturnsAsync(words);
 
-        var cache = new MemoryCache<IReadOnlyCollection<string>>();
+        var solver =
+            new AnagramSolverService(
+                _repository.Object,
+                _filterChain.Object);
 
-        var solver = new AnagramSolverService(
-            _repository.Object,
-            cache);
+        // Act
+        IReadOnlyCollection<string> result =
+            await solver.GetAnagramsAsync(input);
 
-        var result = await solver.GetAnagramsAsync(input);
+        // Assert
         result.Should().BeEmpty();
     }
 
     [Fact]
     public async Task GetAnagramsAsync_ShouldReturnOneWordAnagram_WhenExactMatchExists()
     {
-
-
-        var input = new Dictionary<char, int>
-        {
-            ['a'] = 1,
-            ['b'] = 1,
-            ['c'] = 1
-        };
-
+        // Arrange
+        var input =
+            new Dictionary<char, int>
+            {
+                ['a'] = 1,
+                ['b'] = 1,
+                ['c'] = 1
+            };
 
         Word[] words =
-            [
-                new Word
-                {
-                    Text = "cab",
-                    Type = "bdv",
-                    WordLetterCount = new Dictionary<char,int>
+        [
+            new Word
+            {
+                Text = "cab",
+                Type = "dkt",
+                WordLetterCount =
+                    new Dictionary<char, int>
                     {
-                        ['a']=1,
-                        ['b']=1,
-                        ['c']=1
+                        ['a'] = 1,
+                        ['b'] = 1,
+                        ['c'] = 1
                     }
-                }
-            ];
+            }
+        ];
+
         _repository
-           .Setup(r => r.GetAllWordsAsync(It.IsAny<CancellationToken>()))
-           .ReturnsAsync(words);
+            .Setup(repository =>
+                repository.GetAllWordsAsync(
+                    It.IsAny<CancellationToken>()))
+            .ReturnsAsync(words);
 
-        var cache = new MemoryCache<IReadOnlyCollection<string>>();
+        var solver =
+            new AnagramSolverService(
+                _repository.Object,
+                _filterChain.Object);
 
-        var solver = new AnagramSolverService(
-            _repository.Object,
-            cache);
+        // Act
+        IReadOnlyCollection<string> result =
+            await solver.GetAnagramsAsync(input);
 
-        var result = await solver.GetAnagramsAsync(input);
-
-        Assert.Single(result);
-        Assert.Contains("cab", result);
+        // Assert
+        result.Should().ContainSingle();
+        result.Should().Contain("cab");
     }
 }

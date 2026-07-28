@@ -1,7 +1,6 @@
 ﻿using AnagramSolver.BusinessLogic;
 using AnagramSolver.Contracts;
 using System.Net.Http.Json;
-using System.Runtime.CompilerServices;
 
 
 namespace AnagramSolver.Cli;

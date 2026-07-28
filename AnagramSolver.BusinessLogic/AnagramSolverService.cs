@@ -1,15 +1,17 @@
-﻿using AnagramSolver.Contracts.Models;
+﻿using AnagramSolver.Contracts;
+using AnagramSolver.Contracts.Models;
+using System.Collections.Immutable;
 namespace AnagramSolver.BusinessLogic;
 
 public class AnagramSolverService : IAnagramSolver
 {
     private readonly IWordRepository _wordRepository;
-    private readonly MemoryCache<IReadOnlyCollection<string>> _cache;
+    private readonly IWordFilter _filterChain;
 
-    public AnagramSolverService(IWordRepository wordRepository, MemoryCache<IReadOnlyCollection<string>> cache) // constructor 
+    public AnagramSolverService(IWordRepository wordRepository, IWordFilter filterChain) // constructor 
     {
         _wordRepository = wordRepository;
-        _cache = cache;
+        _filterChain = filterChain;
     }
 
     public async Task<IReadOnlyCollection<string>> GetAnagramsAsync(
@@ -23,7 +25,7 @@ public class AnagramSolverService : IAnagramSolver
         cancellationToken.ThrowIfCancellationRequested();
 
 
-        Word[] allWords = GetSupportedWords(loadedWords); //pick only adj verbs and nouns
+        Word[] allWords = GetSupportedWords(loadedWords,userInputDictionary); //pick only adj verbs and nouns
 
         var results = new HashSet<string>();
         var threeWordAnagrams = FindThreeWordAnagrams(userInputDictionary, allWords);
@@ -41,47 +43,34 @@ public class AnagramSolverService : IAnagramSolver
         return results;
     }
 
-    private Word[] GetSupportedWords(Word[] loadedWords)
+    private Word[] GetSupportedWords(Word[] loadedWords, Dictionary<char,int> userInputDictionary)
     {
-        var temporaryWords =
-            new Word[loadedWords.Length];
+        var acceptedWords =
+            new List<Word>();
 
-        var count = 0;
-
-        var seenWords =
-            new HashSet<string>();
+        var seenWords = new HashSet<string>();
 
         foreach (Word word in loadedWords)
         {
-            bool hasSupportedType =
-                word.Type == "bdv" ||
-                word.Type == "dkt" ||
-                word.Type == "vksm";
+            bool passedFilters =
+               _filterChain.Handle(word, userInputDictionary);
 
-            if (!hasSupportedType)
+            if (!passedFilters)
             {
                 continue;
             }
 
-            string key = $"{word.Text}|{word.Type}";
+            string duplicateKey = $"{word.Text}|{word.Type}";
 
-            if (!seenWords.Add(key))
+            if (!seenWords.Add(duplicateKey))
             {
                 continue;
             }
 
-            temporaryWords[count] = word;
-            count++;
+            acceptedWords.Add(word);
         }
 
-        Word[] result = new Word[count];
-
-        Array.Copy(
-            temporaryWords,
-            result,
-            count);
-
-        return result;
+        return acceptedWords.ToArray();
     }
 
     private HashSet<string> FindOneWordAnagrams(
