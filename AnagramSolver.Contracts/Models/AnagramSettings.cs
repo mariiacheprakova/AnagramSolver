@@ -1,5 +1,5 @@
-﻿namespace AnagramSolver.Contracts.Models
-{
+﻿namespace AnagramSolver.Contracts.Models;
+
     public class AnagramSettings
     {
         public int MaxAnagramsCount { get; set; }
@@ -7,4 +7,4 @@
         public string TextFileName { get; set; } = string.Empty;
 
     }
-}
+

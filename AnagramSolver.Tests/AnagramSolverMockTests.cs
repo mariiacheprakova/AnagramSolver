@@ -1,4 +1,5 @@
 ﻿using AnagramSolver.BusinessLogic;
+using AnagramSolver.Contracts;
 using AnagramSolver.Contracts.Models;
 using FluentAssertions;
 using Moq;
@@ -43,7 +44,7 @@ public class AnagramSolverServiceMockTests
             new Word
             {
                 Text = "dog",
-                Type = "bdv",
+                Type = SupportedWordTypes.Adjective,
                 WordLetterCount = new Dictionary<char, int>
                 {
                     ['d'] = 1,
@@ -82,7 +83,7 @@ public class AnagramSolverServiceMockTests
             new Word
             {
                 Text = "cab",
-                Type = "bdv",
+                Type = SupportedWordTypes.Adjective,
                 WordLetterCount = new Dictionary<char, int>
                 {
                     ['a'] = 1,

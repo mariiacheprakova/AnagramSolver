@@ -28,41 +28,6 @@ namespace AnagramSolver.Cli
                 );
                 results ??= new List<string>();
 
-                //var repository =
-                //    new FileWordRepository(settings);
-
-                //var solver =
-                //    new AnagramSolverService(repository);
-
-                //Console.WriteLine(
-                //    "Words are successfully uploaded from a text file.");
-
-                //var inputFormating =
-                //    new FormatingUserInput();
-
-                //var userWords =
-                //    inputFormating.StringSeparationByWords(input);
-
-                //Console.WriteLine(
-                //    $"String contains {userWords.Length} words.");
-
-                //for (int i = 0; i < userWords.Length; i++)
-                //{
-                //    Console.WriteLine($"{i + 1}: {userWords[i]}");
-                //}
-
-                //var userInputString =
-                //    inputFormating.UserInputString(userWords);
-
-                //Console.WriteLine(
-                //    $"Trimmed string without white spaces: {userInputString}");
-
-                //var userInputDictionary =
-                //    inputFormating.LetterCount(userInputString);
-
-                //var results =
-                //    await solver.GetAnagramsAsync(userInputDictionary);
-
                 if (results.Count == 0)
                 {
                     Console.WriteLine("No anagrams were found.");
