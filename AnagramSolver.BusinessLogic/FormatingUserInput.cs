@@ -11,6 +11,7 @@ namespace AnagramSolver.BusinessLogic
         {
             return Regex.Split(input, @"[\s,]+");
         }
+
         public string UserInputString(string[] words)
         {
             return string.Concat(words);
@@ -19,8 +20,6 @@ namespace AnagramSolver.BusinessLogic
         public Dictionary<char, int> LetterCount(string input)
         {
             return input.GroupBy(c => c).ToDictionary(group => group.Key, group => group.Count());
-
         }
-
     }
 }

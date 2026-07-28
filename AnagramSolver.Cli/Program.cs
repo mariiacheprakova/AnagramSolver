@@ -1,5 +1,5 @@
-﻿using AnagramSolver.BusinessLogic;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
+using AnagramSolver.BusinessLogic;
 
 namespace AnagramSolver.Cli
 {
@@ -7,11 +7,9 @@ namespace AnagramSolver.Cli
     {
         static async Task Main(string[] args)
         {
-            var settings =
-                ConfigurationLoader.LoadAnagramSettings();
+            var settings = ConfigurationLoader.LoadAnagramSettings();
 
-            var validator =
-                new UserInputValidation(settings);
+            var validator = new UserInputValidation(settings);
 
             ConsoleConfiguration.ConfigureUtf8Encoding();
 
@@ -25,12 +23,10 @@ namespace AnagramSolver.Cli
             {
                 string encodedInput = Uri.EscapeDataString(input);
 
-                var results = await client.GetFromJsonAsync<List<string>>($"/api/anagrams/{encodedInput}");
+                var results = await client.GetFromJsonAsync<List<string>>(
+                    $"/api/anagrams/{encodedInput}"
+                );
                 results ??= new List<string>();
-
-
-
-
 
                 //var repository =
                 //    new FileWordRepository(settings);
@@ -73,15 +69,11 @@ namespace AnagramSolver.Cli
                 }
                 else
                 {
-                    Console.WriteLine(
-                        $"Found overall {results.Count} anagrams:");
+                    Console.WriteLine($"Found overall {results.Count} anagrams:");
 
-                    int countToPrint = Math.Min(
-                        results.Count,
-                        settings.MaxAnagramsCount);
+                    int countToPrint = Math.Min(results.Count, settings.MaxAnagramsCount);
 
-                    Console.WriteLine(
-                        $"Maximum anagrams displayed: {countToPrint}");
+                    Console.WriteLine($"Maximum anagrams displayed: {countToPrint}");
 
                     int printedCount = 0;
 
@@ -106,9 +98,10 @@ namespace AnagramSolver.Cli
                 Console.WriteLine("Enter a phrase: ");
 
                 Console.WriteLine(
-                    $"Only letters and spaces allowed. " +
-                    $"Must include at least " +
-                    $"{settings.MinimumWordLength} characters.");
+                    $"Only letters and spaces allowed. "
+                        + $"Must include at least "
+                        + $"{settings.MinimumWordLength} characters."
+                );
 
                 string? input = Console.ReadLine();
 
@@ -117,29 +110,25 @@ namespace AnagramSolver.Cli
                     if (!validator.ValidateLength(input))
                     {
                         Console.WriteLine(
-                            $"Input string must be at least " +
-                            $"{settings.MinimumWordLength} characters.");
+                            $"Input string must be at least "
+                                + $"{settings.MinimumWordLength} characters."
+                        );
                     }
-                    else if (
-                        !validator.ContainsOnlyLettersAndWhitespace(input))
+                    else if (!validator.ContainsOnlyLettersAndWhitespace(input))
                     {
-                        Console.WriteLine(
-                            "Input string must contain only spaces and letters.");
+                        Console.WriteLine("Input string must contain only spaces and letters.");
                     }
                     else
                     {
                         Console.WriteLine($"Entered string: {input}");
 
-                        return input!
-                            .Trim()
-                            .ToLower();
+                        return input!.Trim().ToLower();
                     }
 
                     Console.WriteLine("Try again.");
                     input = Console.ReadLine();
                 }
             }
-
         }
     }
 }

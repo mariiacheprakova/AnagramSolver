@@ -1,3 +1,5 @@
+namespace AnagramSolver.Contracts;
+
 using AnagramSolver.Contracts.Models;
 
 public interface IWordRepository

@@ -6,7 +6,7 @@ public class AnagramSolverService : IAnagramSolver
 {
     private readonly IWordRepository _wordRepository;
 
-    public AnagramSolverService(IWordRepository wordRepository) // constructor 
+    public AnagramSolverService(IWordRepository wordRepository) 
     {
         _wordRepository = wordRepository;
     }
@@ -19,8 +19,7 @@ public class AnagramSolverService : IAnagramSolver
 
         cancellationToken.ThrowIfCancellationRequested();
 
-
-        Word[] allWords = GetSupportedWords(loadedWords); //pick only adj verbs and nouns
+        Word[] allWords = GetSupportedWords(loadedWords);
 
         var results = new HashSet<string>();
 

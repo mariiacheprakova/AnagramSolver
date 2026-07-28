@@ -4,18 +4,16 @@ namespace AnagramSolver.BusinessLogic;
 
 public class WordFileParser
 {
-    public Word[] ParseWords(IList<string> lines)
+    public static Word[] ParseWords(IList<string> lines)
     {
-        Word[] temporaryWords = new Word[lines.Count];
-        int count = 0;
+        var temporaryWords = new Word[lines.Count];
+        var count = 0;
 
         var seenWords = new HashSet<string>();
 
         foreach (string line in lines)
         {
-            string[] parts = line.Split(
-                (char[]?)null,
-                StringSplitOptions.RemoveEmptyEntries);
+            var parts = line.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
 
             var wordText = parts[0];
             var wordType = parts[1];
@@ -27,12 +25,12 @@ public class WordFileParser
                 continue;
             }
 
-            Word word = new Word
+            var word = new Word
             {
                 Text = wordText,
                 Type = wordType,
                 Id = count + 1,
-                WordLetterCount = CountLetters(wordText)
+                WordLetterCount = CountLetters(wordText),
             };
 
             temporaryWords[count] = word;
@@ -41,18 +39,14 @@ public class WordFileParser
 
         var result = new Word[count];
 
-        Array.Copy(
-            temporaryWords,
-            result,
-            count);
+        Array.Copy(temporaryWords, result, count);
 
         return result;
     }
 
-    public Dictionary<char, int> CountLetters(string text)
+    public static Dictionary<char, int> CountLetters(string text)
     {
-        var letterCount =
-            new Dictionary<char, int>();
+        var letterCount = new Dictionary<char, int>();
 
         foreach (char character in text)
         {

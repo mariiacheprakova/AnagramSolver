@@ -1,18 +1,15 @@
-﻿using Xunit;
-using FluentAssertions;
-using AnagramSolver.BusinessLogic;
+﻿using AnagramSolver.BusinessLogic;
 using AnagramSolver.Contracts.Models;
+using FluentAssertions;
 using Moq;
 
 namespace AnagramSolver.Tests;
 
 public class AnagramSolverServiceMockTests
 {
-
     private readonly Mock<IWordRepository> _repository = new();
 
     [Fact]
-    //Method_ShouldExpectedBehaviour_WhenCondition - name convention
     public async Task GetAnagramsAsync_ShouldReturnEmpty_WhenInputIsEmpty()
     {
         // Arrange
@@ -38,7 +35,7 @@ public class AnagramSolverServiceMockTests
         {
             ['a'] = 1,
             ['b'] = 1,
-            ['c'] = 1
+            ['c'] = 1,
         };
 
         Word[] words =
@@ -47,13 +44,13 @@ public class AnagramSolverServiceMockTests
             {
                 Text = "dog",
                 Type = "bdv",
-                WordLetterCount = new Dictionary<char,int>
+                WordLetterCount = new Dictionary<char, int>
                 {
-                    ['d']=1,
-                    ['o']=1,
-                    ['g']=1
-                }
-            }
+                    ['d'] = 1,
+                    ['o'] = 1,
+                    ['g'] = 1,
+                },
+            },
         ];
 
         _repository
@@ -72,33 +69,31 @@ public class AnagramSolverServiceMockTests
     [Fact]
     public async Task GetAnagramsAsync_ShouldReturnOneWordAnagram_WhenExactMatchExists()
     {
-
         // Arrange
         var input = new Dictionary<char, int>
         {
             ['a'] = 1,
             ['b'] = 1,
-            ['c'] = 1
+            ['c'] = 1,
         };
 
-
         Word[] words =
-            [
-                new Word
+        [
+            new Word
+            {
+                Text = "cab",
+                Type = "bdv",
+                WordLetterCount = new Dictionary<char, int>
                 {
-                    Text = "cab",
-                    Type = "bdv",
-                    WordLetterCount = new Dictionary<char,int>
-                    {
-                        ['a']=1,
-                        ['b']=1,
-                        ['c']=1
-                    }
-                }
-            ];
+                    ['a'] = 1,
+                    ['b'] = 1,
+                    ['c'] = 1,
+                },
+            },
+        ];
         _repository
-           .Setup(r => r.GetAllWordsAsync(It.IsAny<CancellationToken>()))
-           .ReturnsAsync(words);
+            .Setup(r => r.GetAllWordsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(words);
 
         var solver = new AnagramSolverService(_repository.Object);
 
