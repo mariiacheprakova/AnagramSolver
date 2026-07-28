@@ -1,7 +1,6 @@
 using AnagramSolver.BusinessLogic;
 using AnagramSolver.BusinessLogic.Decorators;
 using AnagramSolver.BusinessLogic.Filters;
-using AnagramSolver.Contracts;
 using AnagramSolver.Contracts.Models;
 using ILogger = AnagramSolver.Contracts.ILogger;
 

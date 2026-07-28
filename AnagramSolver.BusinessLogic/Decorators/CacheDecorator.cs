@@ -1,6 +1,4 @@
-﻿using AnagramSolver.Contracts;
-
-namespace AnagramSolver.BusinessLogic.Decorators;
+﻿namespace AnagramSolver.BusinessLogic.Decorators;
 
 public class CacheDecorator : IAnagramSolver
 {
