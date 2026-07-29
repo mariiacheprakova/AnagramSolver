@@ -51,18 +51,7 @@ class Program
                 logger.Log(
                     $"Maximum anagrams displayed: {countToPrint}");
 
-                int printedCount = 0;
-
-                foreach (string result in results)
-                {
-                    if (printedCount >= countToPrint)
-                    {
-                        break;
-                    }
-
-                    logger.Log(result);
-                    printedCount++;
-                }
+                results.Take(countToPrint).ToList().ForEach(result => logger.Log(result));
             }
         }
         catch (HttpRequestException exception)

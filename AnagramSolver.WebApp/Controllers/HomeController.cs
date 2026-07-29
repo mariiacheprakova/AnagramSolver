@@ -51,7 +51,7 @@ public class HomeController : Controller
             var updatedHistoryJson = JsonSerializer.Serialize(searchHistory);
             HttpContext.Session.SetString("searchHistory", updatedHistoryJson);
 
-            var idToDictionary = _letterCounter.CountLetters(id);
+            var idToDictionary = LetterCounter.CountLetters(id);
             model.Anagrams = await _anagramSolver.GetAnagramsAsync(idToDictionary, cancellationToken);
         }
 

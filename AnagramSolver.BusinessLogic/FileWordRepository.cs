@@ -31,14 +31,11 @@ public class FileWordRepository : IWordRepository
     public async Task<Word?> AddWordAsync(Word word, CancellationToken cancellationToken = default)
     {
         Word[] existingWords = await GetAllWordsAsync(cancellationToken);
-        foreach (Word existingWord in existingWords)
+
+        bool wordAlreadyExists = existingWords.Any(existingWord => existingWord.Text == word.Text && existingWord.Type == word.Type); 
+        if(wordAlreadyExists)
         {
-            if (existingWord.Text == word.Text &&
-                existingWord.Type == word.Type)
-            {
-                throw new InvalidOperationException(
-                    "Word already exists.");
-            }
+            throw new InvalidOperationException($"The word '{word.Text}' with type '{word.Type}' already exists.");
         }
 
         string newLine =
@@ -53,7 +50,7 @@ public class FileWordRepository : IWordRepository
         word.Id = existingWords.Length + 1;
 
         word.WordLetterCount =
-            new WordFileParser().CountLetters(word.Text);
+            LetterCounter.CountLetters(word.Text);
 
         return word;
     }
@@ -63,25 +60,14 @@ public class FileWordRepository : IWordRepository
         Word[] words =
         await GetAllWordsAsync(cancellationToken);
 
-        bool found = false;
-
-        List<string> remainingLines = new();
-
-        foreach (Word word in words)
-        {
-            if (word.Id == id)
-            {
-                found = true;
-                continue;
-            }
-
-            remainingLines.Add($"{word.Text} {word.Type}");
-        }
-
-        if (!found)
+        bool wordExists = words.Any(word => word.Id == id);
+     
+        if (!wordExists)
         {
             return false;
         }
+
+        List<string> remainingLines = words.Where(word => word.Id != id).Select(word => $"{word.Text} {word.Type}").ToList();
 
         await File.WriteAllLinesAsync(
             _settings.TextFileName,
