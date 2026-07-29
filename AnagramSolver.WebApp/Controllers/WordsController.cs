@@ -1,6 +1,6 @@
-﻿using AnagramSolver.WebApp.Models;
+﻿using AnagramSolver.Contracts;
+using AnagramSolver.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
-
 
 namespace AnagramSolver.WebApp.Controllers;
 
@@ -12,6 +12,7 @@ public class WordsController : Controller
     public WordsController(IWordRepository wordRepository)
     {
         _wordRepository = wordRepository;
+<<<<<<< HEAD
     } // constructor
       //    The controller declares
       //I require an object that fulfils the IWordRepository contract
@@ -46,6 +47,35 @@ public class WordsController : Controller
         };
 
         return View(model);
+=======
+>>>>>>> origin/feature/AnagramSolver
     }
 }
 
+    public async Task<IActionResult> Index(CancellationToken cancellationToken, int page = 1)
+    {
+        var allWords = await _wordRepository.GetAllWordsAsync(cancellationToken);
+        if (page < 1)
+        {
+            page = 1;
+        }
+
+        int totalPages = (int)Math.Ceiling(allWords.Length / (double)PageSize);
+
+        if (totalPages > 0 && page > totalPages)
+        {
+            page = totalPages;
+        }
+
+        var wordsForCurrentPage = allWords.Skip((page - 1) * PageSize).Take(PageSize).ToArray();
+
+        var model = new WordsViewModel
+        {
+            Words = wordsForCurrentPage,
+            CurrentPage = page,
+            TotalPages = totalPages,
+        };
+
+        return View(model);
+    }
+}

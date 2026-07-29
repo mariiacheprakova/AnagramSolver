@@ -17,8 +17,7 @@ public class AnagramSolverService : IAnagramSolver
     }
 
     public async Task<IReadOnlyCollection<string>> GetAnagramsAsync(
-        Dictionary<char, int> userInputDictionary,
-        CancellationToken cancellationToken = default)
+        Dictionary<char, int> userInputDictionary,CancellationToken cancellationToken=default)
     {
         Word[] loadedWords =
             await _wordRepository.GetAllWordsAsync(cancellationToken);
@@ -73,7 +72,8 @@ public class AnagramSolverService : IAnagramSolver
 
     private HashSet<string> FindTwoWordAnagrams(
         Dictionary<char, int> inputLetters,
-        Word[] allWords)
+        Word[] allWords,
+        CancellationToken cancellationToken)
     {
         return allWords
             .Where(firstWord =>
@@ -107,7 +107,8 @@ public class AnagramSolverService : IAnagramSolver
 
     private HashSet<string> FindThreeWordAnagrams(
         Dictionary<char, int> inputLetters,
-        Word[] allWords)
+        Word[] allWords,
+        CancellationToken cancellationToken)
     {
         return allWords
             .Where(firstWord =>
@@ -223,17 +224,21 @@ public class AnagramSolverService : IAnagramSolver
             secondWord
         };
 
-        Word? adjective =
-            words.FirstOrDefault(word =>
-                word.Type == "bdv");
-
-        Word? noun =
-            words.FirstOrDefault(word =>
-                word.Type == "dkt");
-
-        Word? verb =
-            words.FirstOrDefault(word =>
-                word.Type == "vksm");
+        foreach (Word word in words)
+        {
+            if (word.Type == SupportedWordTypes.Adjective)
+            {
+                adjective = word;
+            }
+            else if (word.Type == SupportedWordTypes.Noun)
+            {
+                noun = word;
+            }
+            else if (word.Type == SupportedWordTypes.Verb)
+            {
+                verb = word;
+            }
+        }
 
         if (adjective is not null && noun is not null)
         {

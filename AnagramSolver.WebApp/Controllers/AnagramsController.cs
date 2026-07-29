@@ -1,13 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Diagnostics;
 using AnagramSolver.BusinessLogic;
-using System.Diagnostics;
+using AnagramSolver.Contracts;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AnagramSolver.WebApp.Controllers;
 
-
 [ApiController]
 [Route("api/[controller]")]
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/feature/AnagramSolver
 public class AnagramsController : ControllerBase
 {
     private readonly IAnagramSolver _anagramSolver;
@@ -20,8 +23,15 @@ public class AnagramsController : ControllerBase
     }
 
     [HttpGet("{word}")]
+<<<<<<< HEAD
     public async Task<ActionResult<IReadOnlyCollection<string>>> GetAnagramsAsync(string word, CancellationToken cancellationToken)
 
+=======
+    public async Task<ActionResult<IReadOnlyCollection<string>>> GetAnagramsAsync(
+        string word,
+        CancellationToken cancellationToken
+    )
+>>>>>>> origin/feature/AnagramSolver
     {
         var stopwatch = Stopwatch.StartNew();
 
@@ -30,10 +40,7 @@ public class AnagramsController : ControllerBase
         stopwatch.Stop();
 
         Response.Headers.Append("X-Anagram-Count", anagrams.Count().ToString());
-        Response.Headers.Append("X-Seacrh-Duration-Ms", stopwatch.ElapsedMilliseconds.ToString());
+        Response.Headers.Append("X-Search-Duration-Ms", stopwatch.ElapsedMilliseconds.ToString());
         return Ok(anagrams);
     }
 }
-
-
-

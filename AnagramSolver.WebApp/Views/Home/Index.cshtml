@@ -42,7 +42,7 @@
 </a>
 @if(!string.IsNullOrWhiteSpace(ViewBag.LastSearch as string))
 {
-    <p>Last search @ViewBag.LastSearch</p>
+    <p>Last search: @ViewBag.LastSearch</p>
 }
 
 @if (ViewBag.SearchHistory is List<string> searchHistory && searchHistory.Count > 0)

@@ -1,4 +1,5 @@
-﻿using AnagramSolver.Contracts.Models;
+﻿using AnagramSolver.Contracts;
+using AnagramSolver.Contracts.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AnagramSolver.WebApp.Controllers;
@@ -16,6 +17,7 @@ public class WordsApiController : ControllerBase
 
     [HttpGet]
     public async Task<ActionResult<IReadOnlyCollection<Word>>> GetWordsAsync(
+<<<<<<< HEAD
            CancellationToken cancellationToken)
     {
         // http://localhost:5053/api/words?page=2&size=100
@@ -30,11 +32,26 @@ public class WordsApiController : ControllerBase
         Word[] words =
             await _wordRepository.GetAllWordsAsync(cancellationToken);
 
+=======
+        CancellationToken cancellationToken
+    )
+    {
+        var headers = Request.Headers;
+        var method = Request.Method;
+        var path = Request.Path;
+        var query = Request.Query;
+        var ip = HttpContext.Connection.RemoteIpAddress;
+        var cookies = Request.Cookies;
+
+        Word[] words = await _wordRepository.GetAllWordsAsync(cancellationToken);
+
+>>>>>>> origin/feature/AnagramSolver
         return Ok(words);
     }
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<Word>> GetWordByIdAsync(
+<<<<<<< HEAD
             int id,
             CancellationToken cancellationToken)
     {
@@ -42,6 +59,13 @@ public class WordsApiController : ControllerBase
             await _wordRepository.GetWordByIdAsync(
                 id,
                 cancellationToken);
+=======
+        int id,
+        CancellationToken cancellationToken
+    )
+    {
+        Word? word = await _wordRepository.GetWordByIdAsync(id, cancellationToken);
+>>>>>>> origin/feature/AnagramSolver
 
         if (word is null)
         {
@@ -54,6 +78,7 @@ public class WordsApiController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Word>> AddWordAsync(
         Word word,
+<<<<<<< HEAD
         CancellationToken cancellationToken)
     {
         Word addedWord =
@@ -76,6 +101,20 @@ public class WordsApiController : ControllerBase
             await _wordRepository.DeleteWordByIdAsync(
                 id,
                 cancellationToken);
+=======
+        CancellationToken cancellationToken
+    )
+    {
+        Word addedWord = await _wordRepository.AddWordAsync(word, cancellationToken);
+
+        return CreatedAtAction(nameof(GetWordByIdAsync), new { id = addedWord.Id }, addedWord);
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> DeleteWordAsync(int id, CancellationToken cancellationToken)
+    {
+        bool deleted = await _wordRepository.DeleteWordByIdAsync(id, cancellationToken);
+>>>>>>> origin/feature/AnagramSolver
 
         if (!deleted)
         {
@@ -84,4 +123,8 @@ public class WordsApiController : ControllerBase
 
         return NoContent();
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> origin/feature/AnagramSolver
