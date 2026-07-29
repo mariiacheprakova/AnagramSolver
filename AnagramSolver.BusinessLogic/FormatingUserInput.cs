@@ -21,7 +21,7 @@ namespace AnagramSolver.BusinessLogic
 
         public Dictionary<char, int> CountLetters(string input)
         {
-            return _letterCounter.CountLetters(input);
+            return LetterCounter.CountLetters(input);
         }
     }
 }

@@ -14,9 +14,9 @@ public class WordFilterBase : IWordFilter
         return next;
     }
 
-   public virtual bool Handle(Word word,Dictionary<char,int> availableLetters)
+    public virtual bool Handle(Word word, Dictionary<char, int> availableLetters)
     {
-        if(_next is null)
+        if (_next is null)
         {
             return true;
         }

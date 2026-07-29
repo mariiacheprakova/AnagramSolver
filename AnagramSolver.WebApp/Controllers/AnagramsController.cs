@@ -7,31 +7,20 @@ namespace AnagramSolver.WebApp.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/feature/AnagramSolver
 public class AnagramsController : ControllerBase
 {
     private readonly IAnagramSolver _anagramSolver;
-  
+
 
     public AnagramsController(IAnagramSolver anagramSolver)
     {
         _anagramSolver = anagramSolver;
-       
+
     }
 
     [HttpGet("{word}")]
-<<<<<<< HEAD
     public async Task<ActionResult<IReadOnlyCollection<string>>> GetAnagramsAsync(string word, CancellationToken cancellationToken)
-
-=======
-    public async Task<ActionResult<IReadOnlyCollection<string>>> GetAnagramsAsync(
-        string word,
-        CancellationToken cancellationToken
-    )
->>>>>>> origin/feature/AnagramSolver
     {
         var stopwatch = Stopwatch.StartNew();
 
