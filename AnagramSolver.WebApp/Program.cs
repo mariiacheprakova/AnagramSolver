@@ -1,49 +1,47 @@
 using AnagramSolver.BusinessLogic;
+using AnagramSolver.Contracts;
 using AnagramSolver.Contracts.Models;
-using Microsoft.Extensions.Configuration;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
 AnagramSettings settings =
-    builder.Configuration
-    .GetSection("AnagramSettings")
-    .Get<AnagramSettings>()
-    ?? throw new InvalidOperationException(
-        "AnagramSettings configuration is missing.");
+    builder.Configuration.GetSection("AnagramSettings").Get<AnagramSettings>()
+    ?? throw new InvalidOperationException("AnagramSettings configuration is missing.");
+
 builder.Services.AddSingleton(settings);
 
-// Add services to the container.// knows how to create controllerds, views, ..
 builder.Services.AddControllersWithViews();
-builder.Services.AddScoped<IWordRepository, FileWordRepository>();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddSingleton<IWordRepository, FileWordRepository>();
 builder.Services.AddScoped<IAnagramSolver, AnagramSolverService>();
 builder.Services.AddScoped<LetterCounter>();
-var app = builder.Build();
+builder.Services.AddSession();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment()) // not developing locally
+var app = builder.Build();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+
     app.UseHsts();
 }
 
-app.UseHttpsRedirection(); // security
-app.UseRouting(); // construct url like /home/index
+app.UseHttpsRedirection();
+app.UseRouting();
+app.UseSession();
 
-app.UseAuthorization(); // logins and permissions
+app.UseAuthorization();
 
-app.MapStaticAssets(); //wwwroot - css, js, make them available
+app.MapControllers();
+app.MapStaticAssets();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}") // routing rule + setting default id - optional
-
+app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
-//GET requests retrieve information.They should not modify data.
-//POST is used when data changes.
-
-
-//"The application follows the MVC pattern and the principle of Separation of Concerns. The controller coordinates requests, the service contains the business logic, the repository manages data access, the ViewModel transports data to the View, and the View is responsible solely for presentation. This organisation keeps the code modular, maintainable, and easier to test."
 
 app.Run();

@@ -1,4 +1,5 @@
-﻿using AnagramSolver.Contracts.Models;
+﻿using AnagramSolver.Contracts;
+using AnagramSolver.Contracts.Models;
 
 namespace AnagramSolver.BusinessLogic;
 
@@ -6,26 +7,25 @@ public class AnagramSolverService : IAnagramSolver
 {
     private readonly IWordRepository _wordRepository;
 
-    public AnagramSolverService(IWordRepository wordRepository) // constructor 
+    public AnagramSolverService(IWordRepository wordRepository) 
     {
         _wordRepository = wordRepository;
     }
 
     public async Task<IReadOnlyCollection<string>> GetAnagramsAsync(
-        Dictionary<char, int> userInputDictionary,CancellationToken cancellationToken=default)
+        Dictionary<char, int> userInputDictionary, CancellationToken cancellationToken = default)
     {
         Word[] loadedWords = await
             _wordRepository.GetAllWordsAsync(cancellationToken);
 
         cancellationToken.ThrowIfCancellationRequested();
 
-
-        Word[] allWords = GetSupportedWords(loadedWords); //pick only adj verbs and nouns
+        Word[] allWords = GetSupportedWords(loadedWords);
 
         var results = new HashSet<string>();
 
-        var threeWordAnagrams = FindThreeWordAnagrams(userInputDictionary, allWords);
-        var twoWordAnagrams = FindTwoWordAnagrams(userInputDictionary, allWords);
+        var threeWordAnagrams = FindThreeWordAnagrams(userInputDictionary, allWords,cancellationToken);
+        var twoWordAnagrams = FindTwoWordAnagrams(userInputDictionary, allWords,cancellationToken);
         var oneWordAnagrams = FindOneWordAnagrams(userInputDictionary, allWords);
 
         results.UnionWith(threeWordAnagrams);
@@ -48,9 +48,10 @@ public class AnagramSolverService : IAnagramSolver
         foreach (Word word in loadedWords)
         {
             bool hasSupportedType =
-                word.Type == "bdv" ||
-                word.Type == "dkt" ||
-                word.Type == "vksm";
+                word.Type == SupportedWordTypes.Adjective ||
+                word.Type == SupportedWordTypes.Noun ||
+                word.Type == SupportedWordTypes.Verb;
+               
 
             if (!hasSupportedType)
             {
@@ -97,7 +98,8 @@ public class AnagramSolverService : IAnagramSolver
 
     private HashSet<string> FindTwoWordAnagrams(
         Dictionary<char, int> inputLetters,
-        Word[] allWords)
+        Word[] allWords,
+        CancellationToken cancellationToken)
     {
         var twoWordAnagrams = new HashSet<string>();
         foreach (Word firstWord in allWords)
@@ -116,6 +118,7 @@ public class AnagramSolverService : IAnagramSolver
 
             foreach (Word secondWord in allWords)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 if (!CanUseWord(
                     afterFirstWord,
                     secondWord.WordLetterCount))
@@ -144,11 +147,13 @@ public class AnagramSolverService : IAnagramSolver
 
     private HashSet<string> FindThreeWordAnagrams(
         Dictionary<char, int> inputLetters,
-        Word[] allWords)
+        Word[] allWords,
+        CancellationToken cancellationToken)
     {
         var threeWordAnagrams = new HashSet<string>();
         foreach (Word firstWord in allWords)
         {
+            
             if (!CanUseWord(
                 inputLetters,
                 firstWord.WordLetterCount))
@@ -163,6 +168,7 @@ public class AnagramSolverService : IAnagramSolver
 
             foreach (Word secondWord in allWords)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 if (!CanUseWord(
                     afterFirstWord,
                     secondWord.WordLetterCount))
@@ -177,6 +183,7 @@ public class AnagramSolverService : IAnagramSolver
 
                 foreach (Word thirdWord in allWords)
                 {
+                
                     if (!CanUseWord(
                         afterSecondWord,
                         thirdWord.WordLetterCount))
@@ -318,15 +325,15 @@ public class AnagramSolverService : IAnagramSolver
 
         foreach (Word word in words)
         {
-            if (word.Type == "bdv")
+            if (word.Type == SupportedWordTypes.Adjective)
             {
                 adjective = word;
             }
-            else if (word.Type == "dkt")
+            else if (word.Type == SupportedWordTypes.Noun)
             {
                 noun = word;
             }
-            else if (word.Type == "vksm")
+            else if (word.Type == SupportedWordTypes.Verb)
             {
                 verb = word;
             }
@@ -369,7 +376,7 @@ public class AnagramSolverService : IAnagramSolver
 
         foreach (Word word in words)
         {
-            if (word.Type == "bdv")
+            if (word.Type == SupportedWordTypes.Adjective)
             {
                 if (adjective != null)
                 {
@@ -379,7 +386,7 @@ public class AnagramSolverService : IAnagramSolver
 
                 adjective = word;
             }
-            else if (word.Type == "dkt")
+            else if (word.Type == SupportedWordTypes.Noun)
             {
                 if (noun != null)
                 {
@@ -389,7 +396,7 @@ public class AnagramSolverService : IAnagramSolver
 
                 noun = word;
             }
-            else if (word.Type == "vksm")
+            else if (word.Type == SupportedWordTypes.Verb)
             {
                 if (verb != null)
                 {
