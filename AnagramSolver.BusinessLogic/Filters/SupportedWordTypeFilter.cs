@@ -17,13 +17,13 @@ public class SupportedWordTypeFilter : WordFilterBase
 
     public override bool Handle(Word word, Dictionary<char, int> availableLetters)
     {
-        if(!supportedTypes.Contains(word.Type))
+        if (!supportedTypes.Contains(word.Type))
         {
             return false;
         }
-        
+
         return base.Handle(word, availableLetters);
     }
-   
+
 
 }

@@ -4,68 +4,35 @@ namespace AnagramSolver.BusinessLogic;
 
 public class WordFileParser
 {
-    public Word[] ParseWords(IList<string> lines)
+    public static Word[] ParseWords(IList<string> lines)
     {
-        Word[] temporaryWords = new Word[lines.Count];
-        int count = 0;
 
+        var letterCounter = new LetterCounter();
         var seenWords = new HashSet<string>();
 
-        foreach (string line in lines)
-        {
-            string[] parts = line.Split(
-                (char[]?)null,
-                StringSplitOptions.RemoveEmptyEntries);
-
-            var wordText = parts[0];
-            var wordType = parts[1];
-
-            var key = $"{wordText}|{wordType}";
-
-            if (!seenWords.Add(key))
+        var temporaryWords = lines.Select(line =>
             {
-                continue;
-            }
+                var parts = line.Split();
 
-            Word word = new Word
+                var wordText = parts[0];
+                var wordType = parts[1];
+                return (
+                wordText,
+                wordType,
+                key: $"{wordText}| {wordType}"
+                );
+
+            })
+            .Where(parts => seenWords.Add(parts.key))
+            .Select((parts, index) => new Word
             {
-                Text = wordText,
-                Type = wordType,
-                Id = count + 1,
-                WordLetterCount = CountLetters(wordText)
-            };
+                Text = parts.wordText,
+                Type = parts.wordType,
+                Id = index + 1,
+                WordLetterCount = LetterCounter.CountLetters(parts.wordText)
+            })
+            .ToArray();
 
-            temporaryWords[count] = word;
-            count++;
-        }
-
-        var result = new Word[count];
-
-        Array.Copy(
-            temporaryWords,
-            result,
-            count);
-
-        return result;
-    }
-
-    public Dictionary<char, int> CountLetters(string text)
-    {
-        var letterCount =
-            new Dictionary<char, int>();
-
-        foreach (char character in text)
-        {
-            if (letterCount.ContainsKey(character))
-            {
-                letterCount[character]++;
-            }
-            else
-            {
-                letterCount[character] = 1;
-            }
-        }
-
-        return letterCount;
+        return temporaryWords;
     }
 }

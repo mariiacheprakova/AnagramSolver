@@ -1,4 +1,5 @@
-﻿using AnagramSolver.Contracts.Models;
+﻿using AnagramSolver.Contracts;
+using AnagramSolver.Contracts.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AnagramSolver.WebApp.Controllers;
@@ -16,17 +17,8 @@ public class WordsApiController : ControllerBase
 
     [HttpGet]
     public async Task<ActionResult<IReadOnlyCollection<Word>>> GetWordsAsync(
-           CancellationToken cancellationToken)
+        CancellationToken cancellationToken)
     {
-        // http://localhost:5053/api/words?page=2&size=100
-        var headers = Request.Headers;
-        var method = Request.Method; // GET
-        var path = Request.Path; // api.words
-        var query = Request.Query; //?page=2&size=100
-        var ip = HttpContext.Connection.RemoteIpAddress; //Who sent this request? if local might be ::1
-        var cookies = Request.Cookies;
-
-
         Word[] words =
             await _wordRepository.GetAllWordsAsync(cancellationToken);
 
@@ -35,8 +27,8 @@ public class WordsApiController : ControllerBase
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<Word>> GetWordByIdAsync(
-            int id,
-            CancellationToken cancellationToken)
+        int id,
+        CancellationToken cancellationToken)
     {
         Word? word =
             await _wordRepository.GetWordByIdAsync(

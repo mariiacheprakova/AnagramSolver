@@ -1,8 +1,6 @@
-﻿using AnagramSolver.WebApp.Models;
+﻿using AnagramSolver.Contracts;
+using AnagramSolver.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
-
-
-namespace AnagramSolver.WebApp.Controllers;
 
 public class WordsController : Controller
 {
@@ -12,40 +10,42 @@ public class WordsController : Controller
     public WordsController(IWordRepository wordRepository)
     {
         _wordRepository = wordRepository;
-    } // constructor
-      //    The controller declares
-      //I require an object that fulfils the IWordRepository contract
-      //ASP.NET obtains the registered implementation from the DI container and supplies it to the constructor.
+    }
 
-    public async Task<IActionResult> Index(CancellationToken cancellationToken, int page = 1)
+    public async Task<IActionResult> Index(
+        CancellationToken cancellationToken,
+        int page = 1)
     {
-        var allWords = await _wordRepository.GetAllWordsAsync(cancellationToken);
+        var allWords =
+            await _wordRepository.GetAllWordsAsync(cancellationToken);
+
         if (page < 1)
         {
             page = 1;
         }
 
-        int totalPages = (int)Math.Ceiling(
-        allWords.Length / (double)PageSize);
+        int totalPages =
+            (int)Math.Ceiling(allWords.Length / (double)PageSize);
 
         if (totalPages > 0 && page > totalPages)
         {
             page = totalPages;
         }
 
-        var wordsForCurrentPage = allWords
-            .Skip((page - 1) * PageSize)
-            .Take(PageSize)
-            .ToArray();
+        var wordsForCurrentPage =
+            allWords
+                .Skip((page - 1) * PageSize)
+                .Take(PageSize)
+                .ToArray();
 
-        var model = new WordsViewModel
-        {
-            Words = wordsForCurrentPage,
-            CurrentPage = page,
-            TotalPages = totalPages
-        };
+        var model =
+            new WordsViewModel
+            {
+                Words = wordsForCurrentPage,
+                CurrentPage = page,
+                TotalPages = totalPages
+            };
 
         return View(model);
     }
 }
-

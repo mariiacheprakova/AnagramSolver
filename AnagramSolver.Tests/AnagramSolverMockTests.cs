@@ -1,8 +1,7 @@
-﻿using Xunit;
-using FluentAssertions;
 using AnagramSolver.BusinessLogic;
 using AnagramSolver.Contracts;
 using AnagramSolver.Contracts.Models;
+using FluentAssertions;
 using Moq;
 
 namespace AnagramSolver.Tests;
@@ -64,14 +63,13 @@ public class AnagramSolverServiceMockTests
             new Word
             {
                 Text = "dog",
-                Type = "dkt",
-                WordLetterCount =
-                    new Dictionary<char, int>
-                    {
-                        ['d'] = 1,
-                        ['o'] = 1,
-                        ['g'] = 1
-                    }
+                Type = SupportedWordTypes.Adjective,
+                WordLetterCount = new Dictionary<char, int>
+                {
+                    ['d'] = 1,
+                    ['o'] = 1,
+                    ['g'] = 1
+                }
             }
         ];
 
@@ -80,6 +78,12 @@ public class AnagramSolverServiceMockTests
                 repository.GetAllWordsAsync(
                     It.IsAny<CancellationToken>()))
             .ReturnsAsync(words);
+
+        _filterChain
+            .Setup(filter => filter.Handle(
+                It.Is<Word>(word => word.Text == "dog"),
+                It.IsAny<Dictionary<char, int>>()))
+            .Returns(false);
 
         var solver =
             new AnagramSolverService(
@@ -111,14 +115,13 @@ public class AnagramSolverServiceMockTests
             new Word
             {
                 Text = "cab",
-                Type = "dkt",
-                WordLetterCount =
-                    new Dictionary<char, int>
-                    {
-                        ['a'] = 1,
-                        ['b'] = 1,
-                        ['c'] = 1
-                    }
+                Type = SupportedWordTypes.Adjective,
+                WordLetterCount = new Dictionary<char, int>
+                {
+                    ['a'] = 1,
+                    ['b'] = 1,
+                    ['c'] = 1
+                }
             }
         ];
 
@@ -127,6 +130,12 @@ public class AnagramSolverServiceMockTests
                 repository.GetAllWordsAsync(
                     It.IsAny<CancellationToken>()))
             .ReturnsAsync(words);
+
+        _filterChain
+            .Setup(filter => filter.Handle(
+                It.Is<Word>(word => word.Text == "cab"),
+                It.IsAny<Dictionary<char, int>>()))
+            .Returns(true);
 
         var solver =
             new AnagramSolverService(
@@ -138,7 +147,9 @@ public class AnagramSolverServiceMockTests
             await solver.GetAnagramsAsync(input);
 
         // Assert
-        result.Should().ContainSingle();
-        result.Should().Contain("cab");
+        result.Should()
+            .ContainSingle()
+            .Which.Should()
+            .Be("cab");
     }
 }

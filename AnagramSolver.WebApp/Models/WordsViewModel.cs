@@ -10,6 +10,4 @@ public class WordsViewModel
 
     public bool HasPreviousPage => CurrentPage > 1;
     public bool HasNextPage => CurrentPage < TotalPages;
-    //The value of this property is produced by the expression on the right.
 }
-

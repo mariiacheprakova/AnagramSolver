@@ -1,7 +1,6 @@
-﻿using AnagramSolver.BusinessLogic;
+using AnagramSolver.BusinessLogic;
 using AnagramSolver.Contracts;
 using System.Net.Http.Json;
-
 
 namespace AnagramSolver.Cli;
 
@@ -10,6 +9,7 @@ class Program
     static async Task Main(string[] args)
     {
         ILogger logger = new Logging();
+
         var settings =
             ConfigurationLoader.LoadAnagramSettings();
 
@@ -27,7 +27,8 @@ class Program
 
         try
         {
-            string encodedInput = Uri.EscapeDataString(input);
+            string encodedInput =
+                Uri.EscapeDataString(input);
 
             var results =
                 await client.GetFromJsonAsync<List<string>>(
@@ -44,24 +45,17 @@ class Program
                 logger.Log(
                     $"Found overall {results.Count} anagrams:");
 
-                int countToPrint = Math.Min(
-                    results.Count,
-                    settings.MaxAnagramsCount);
+                int countToPrint =
+                    Math.Min(
+                        results.Count,
+                        settings.MaxAnagramsCount);
 
                 logger.Log(
                     $"Maximum anagrams displayed: {countToPrint}");
 
-                int printedCount = 0;
-
-                foreach (string result in results)
+                foreach (string result in results.Take(countToPrint))
                 {
-                    if (printedCount >= countToPrint)
-                    {
-                        break;
-                    }
-
                     logger.Log(result);
-                    printedCount++;
                 }
             }
         }
