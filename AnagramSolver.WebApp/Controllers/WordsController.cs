@@ -45,15 +45,3 @@ public class WordsController : Controller
     }
 }
 
-        var wordsForCurrentPage = allWords.Skip((page - 1) * PageSize).Take(PageSize).ToArray();
-
-        var model = new WordsViewModel
-        {
-            Words = wordsForCurrentPage,
-            CurrentPage = page,
-            TotalPages = totalPages,
-        };
-
-        return View(model);
-    }
-}

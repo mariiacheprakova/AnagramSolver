@@ -24,7 +24,7 @@ public class AnagramSolverService : IAnagramSolver
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        Word[] allWords = GetSupportedWords(loadedWords);
+        Word[] allWords = GetSupportedWords(loadedWords,userInputDictionary);
 
         var results = new HashSet<string>();
 
