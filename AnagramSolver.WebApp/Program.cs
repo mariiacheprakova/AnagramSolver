@@ -7,16 +7,11 @@ using ILogger = AnagramSolver.Contracts.ILogger;
 var builder = WebApplication.CreateBuilder(args);
 
 AnagramSettings settings =
-    builder.Configuration
-    .GetSection("AnagramSettings")
-    .Get<AnagramSettings>()
-
-    ?? throw new InvalidOperationException(
-        "AnagramSettings configuration is missing.");
+    builder.Configuration.GetSection("AnagramSettings").Get<AnagramSettings>()
+    ?? throw new InvalidOperationException("AnagramSettings configuration is missing.");
 
 builder.Services.AddSingleton(settings);
 
-// MVC + Swagger
 builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

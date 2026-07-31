@@ -24,12 +24,12 @@ public class AnagramSolverService : IAnagramSolver
 
         cancellationToken.ThrowIfCancellationRequested();
 
-
-        Word[] allWords = GetSupportedWords(loadedWords,userInputDictionary); //pick only adj verbs and nouns
+        Word[] allWords = GetSupportedWords(loadedWords);
 
         var results = new HashSet<string>();
-        var threeWordAnagrams = FindThreeWordAnagrams(userInputDictionary, allWords);
-        var twoWordAnagrams = FindTwoWordAnagrams(userInputDictionary, allWords);
+
+        var threeWordAnagrams = FindThreeWordAnagrams(userInputDictionary, allWords,cancellationToken);
+        var twoWordAnagrams = FindTwoWordAnagrams(userInputDictionary, allWords,cancellationToken);
         var oneWordAnagrams = FindOneWordAnagrams(userInputDictionary, allWords);
 
 
@@ -92,7 +92,8 @@ public class AnagramSolverService : IAnagramSolver
 
     private HashSet<string> FindTwoWordAnagrams(
         Dictionary<char, int> inputLetters,
-        Word[] allWords)
+        Word[] allWords,
+        CancellationToken cancellationToken)
     {
         var twoWordAnagrams = new HashSet<string>();
         foreach (Word firstWord in allWords)
@@ -111,6 +112,7 @@ public class AnagramSolverService : IAnagramSolver
 
             foreach (Word secondWord in allWords)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 if (!CanUseWord(
                     afterFirstWord,
                     secondWord.WordLetterCount))
@@ -139,11 +141,13 @@ public class AnagramSolverService : IAnagramSolver
 
     private HashSet<string> FindThreeWordAnagrams(
         Dictionary<char, int> inputLetters,
-        Word[] allWords)
+        Word[] allWords,
+        CancellationToken cancellationToken)
     {
         var threeWordAnagrams = new HashSet<string>();
         foreach (Word firstWord in allWords)
         {
+            
             if (!CanUseWord(
                 inputLetters,
                 firstWord.WordLetterCount))
@@ -158,6 +162,7 @@ public class AnagramSolverService : IAnagramSolver
 
             foreach (Word secondWord in allWords)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 if (!CanUseWord(
                     afterFirstWord,
                     secondWord.WordLetterCount))
@@ -172,6 +177,7 @@ public class AnagramSolverService : IAnagramSolver
 
                 foreach (Word thirdWord in allWords)
                 {
+                
                     if (!CanUseWord(
                         afterSecondWord,
                         thirdWord.WordLetterCount))
@@ -313,15 +319,15 @@ public class AnagramSolverService : IAnagramSolver
 
         foreach (Word word in words)
         {
-            if (word.Type == "bdv")
+            if (word.Type == SupportedWordTypes.Adjective)
             {
                 adjective = word;
             }
-            else if (word.Type == "dkt")
+            else if (word.Type == SupportedWordTypes.Noun)
             {
                 noun = word;
             }
-            else if (word.Type == "vksm")
+            else if (word.Type == SupportedWordTypes.Verb)
             {
                 verb = word;
             }
@@ -364,7 +370,7 @@ public class AnagramSolverService : IAnagramSolver
 
         foreach (Word word in words)
         {
-            if (word.Type == "bdv")
+            if (word.Type == SupportedWordTypes.Adjective)
             {
                 if (adjective != null)
                 {
@@ -374,7 +380,7 @@ public class AnagramSolverService : IAnagramSolver
 
                 adjective = word;
             }
-            else if (word.Type == "dkt")
+            else if (word.Type == SupportedWordTypes.Noun)
             {
                 if (noun != null)
                 {
@@ -384,7 +390,7 @@ public class AnagramSolverService : IAnagramSolver
 
                 noun = word;
             }
-            else if (word.Type == "vksm")
+            else if (word.Type == SupportedWordTypes.Verb)
             {
                 if (verb != null)
                 {

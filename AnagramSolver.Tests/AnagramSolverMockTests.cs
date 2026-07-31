@@ -1,8 +1,7 @@
-﻿using Xunit;
-using FluentAssertions;
-using AnagramSolver.BusinessLogic;
+﻿using AnagramSolver.BusinessLogic;
 using AnagramSolver.Contracts;
 using AnagramSolver.Contracts.Models;
+using FluentAssertions;
 using Moq;
 
 namespace AnagramSolver.Tests;
@@ -51,28 +50,26 @@ public class AnagramSolverServiceMockTests
     public async Task GetAnagramsAsync_ShouldReturnEmpty_WhenNoAnagramsExist()
     {
         // Arrange
-        var input =
-            new Dictionary<char, int>
-            {
-                ['a'] = 1,
-                ['b'] = 1,
-                ['c'] = 1
-            };
+        var input = new Dictionary<char, int>
+        {
+            ['a'] = 1,
+            ['b'] = 1,
+            ['c'] = 1,
+        };
 
         Word[] words =
         [
             new Word
             {
                 Text = "dog",
-                Type = "dkt",
-                WordLetterCount =
-                    new Dictionary<char, int>
-                    {
-                        ['d'] = 1,
-                        ['o'] = 1,
-                        ['g'] = 1
-                    }
-            }
+                Type = SupportedWordTypes.Adjective,
+                WordLetterCount = new Dictionary<char, int>
+                {
+                    ['d'] = 1,
+                    ['o'] = 1,
+                    ['g'] = 1,
+                },
+            },
         ];
 
         _repository
@@ -98,34 +95,29 @@ public class AnagramSolverServiceMockTests
     public async Task GetAnagramsAsync_ShouldReturnOneWordAnagram_WhenExactMatchExists()
     {
         // Arrange
-        var input =
-            new Dictionary<char, int>
-            {
-                ['a'] = 1,
-                ['b'] = 1,
-                ['c'] = 1
-            };
+        var input = new Dictionary<char, int>
+        {
+            ['a'] = 1,
+            ['b'] = 1,
+            ['c'] = 1,
+        };
 
         Word[] words =
         [
             new Word
             {
                 Text = "cab",
-                Type = "dkt",
-                WordLetterCount =
-                    new Dictionary<char, int>
-                    {
-                        ['a'] = 1,
-                        ['b'] = 1,
-                        ['c'] = 1
-                    }
-            }
+                Type = SupportedWordTypes.Adjective,
+                WordLetterCount = new Dictionary<char, int>
+                {
+                    ['a'] = 1,
+                    ['b'] = 1,
+                    ['c'] = 1,
+                },
+            },
         ];
-
         _repository
-            .Setup(repository =>
-                repository.GetAllWordsAsync(
-                    It.IsAny<CancellationToken>()))
+            .Setup(r => r.GetAllWordsAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(words);
 
         var solver =
@@ -134,11 +126,10 @@ public class AnagramSolverServiceMockTests
                 _filterChain.Object);
 
         // Act
-        IReadOnlyCollection<string> result =
-            await solver.GetAnagramsAsync(input);
+        var result = await solver.GetAnagramsAsync(input);
 
         // Assert
-        result.Should().ContainSingle();
-        result.Should().Contain("cab");
+        Assert.Single(result);
+        Assert.Contains("cab", result);
     }
 }

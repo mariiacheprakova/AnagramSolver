@@ -1,11 +1,12 @@
-﻿using AnagramSolver.Contracts.Models;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
+using AnagramSolver.Contracts.Models;
 
 namespace AnagramSolver.BusinessLogic;
 
 public class UserInputValidation
 {
     private readonly AnagramSettings _settings;
+
     public UserInputValidation(AnagramSettings settings)
     {
         _settings = settings;
@@ -13,15 +14,11 @@ public class UserInputValidation
 
     public bool ValidateLength(string? input)
     {
-        return !string.IsNullOrWhiteSpace(input)
-            && input.Length >= _settings.MinimumWordLength;
+        return !string.IsNullOrWhiteSpace(input) && input.Length >= _settings.MinimumWordLength;
     }
 
     public bool ContainsOnlyLettersAndWhitespace(string? input)
     {
-        return !string.IsNullOrWhiteSpace(input)
-             && Regex.IsMatch(input, @"^[\p{L}\s]+$");
+        return !string.IsNullOrWhiteSpace(input) && Regex.IsMatch(input, @"^[\p{L}\s]+$");
     }
-
-
 }
