@@ -1,4 +1,5 @@
-﻿using AnagramSolver.Contracts;
+﻿using AnagramSolver.BusinessLogic;
+using AnagramSolver.Contracts;
 using AnagramSolver.Contracts.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,10 +10,11 @@ namespace AnagramSolver.WebApp.Controllers;
 public class WordsApiController : ControllerBase
 {
     private readonly IWordRepository _wordRepository;
-
-    public WordsApiController(IWordRepository wordRepository)
+    private readonly MemoryCache<IReadOnlyCollection<string>> _cache;
+    public WordsApiController(IWordRepository wordRepository, MemoryCache<IReadOnlyCollection<string>> cache)
     {
         _wordRepository = wordRepository;
+        _cache = cache;
     }
 
     [HttpGet]
@@ -60,6 +62,8 @@ public class WordsApiController : ControllerBase
                 word,
                 cancellationToken);
 
+        _cache.Clear();
+
         return CreatedAtAction(
             nameof(GetWordByIdAsync),
             new { id = addedWord.Id },
@@ -80,6 +84,7 @@ public class WordsApiController : ControllerBase
         {
             return NotFound();
         }
+        _cache.Clear();
 
         return NoContent();
     }

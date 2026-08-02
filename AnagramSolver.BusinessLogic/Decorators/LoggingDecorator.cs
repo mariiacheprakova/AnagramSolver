@@ -12,7 +12,6 @@ public class LoggingDecorator : IAnagramSolver
         _logger = logger;
         _inner = inner;
     }
-
     public async Task<IReadOnlyCollection<string>> GetAnagramsAsync(Dictionary<char, int> userInputDictionary, CancellationToken cancellationToken = default)
     {
         _logger.Log("Searching for anagrams...");

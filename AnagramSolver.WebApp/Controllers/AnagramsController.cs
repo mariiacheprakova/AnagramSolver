@@ -7,7 +7,6 @@ namespace AnagramSolver.WebApp.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-
 public class AnagramsController : ControllerBase
 {
     private readonly IAnagramSolver _anagramSolver;

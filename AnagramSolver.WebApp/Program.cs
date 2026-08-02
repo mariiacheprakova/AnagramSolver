@@ -52,7 +52,7 @@ builder.Services.AddScoped<IAnagramSolver>(static serviceProvider =>
 
     lengthFilter.SetNext(letterFilter);
     letterFilter.SetNext(supportedWordTypeFilter);
-        
+
     IAnagramSolver solver =
         new AnagramSolverService(
             repository,

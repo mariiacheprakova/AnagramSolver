@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using AnagramSolver.Contracts.Models;
+﻿using AnagramSolver.Contracts.Models;
 using Microsoft.Extensions.Configuration;
 
 namespace AnagramSolver.Cli;
-
 public static class ConfigurationLoader
 {
     public static AnagramSettings LoadAnagramSettings()

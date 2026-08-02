@@ -3,7 +3,6 @@ using AnagramSolver.Contracts;
 using System.Net.Http.Json;
 
 namespace AnagramSolver.Cli;
-
 class Program
 {
     static async Task Main(string[] args)

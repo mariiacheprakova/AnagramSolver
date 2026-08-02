@@ -24,12 +24,12 @@ public class AnagramSolverService : IAnagramSolver
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        Word[] allWords = GetSupportedWords(loadedWords,userInputDictionary);
+        Word[] allWords = GetSupportedWords(loadedWords, userInputDictionary);
 
         var results = new HashSet<string>();
 
-        var threeWordAnagrams = FindThreeWordAnagrams(userInputDictionary, allWords,cancellationToken);
-        var twoWordAnagrams = FindTwoWordAnagrams(userInputDictionary, allWords,cancellationToken);
+        var threeWordAnagrams = FindThreeWordAnagrams(userInputDictionary, allWords, cancellationToken);
+        var twoWordAnagrams = FindTwoWordAnagrams(userInputDictionary, allWords, cancellationToken);
         var oneWordAnagrams = FindOneWordAnagrams(userInputDictionary, allWords);
 
 
@@ -43,7 +43,7 @@ public class AnagramSolverService : IAnagramSolver
         return results;
     }
 
-    private Word[] GetSupportedWords(Word[] loadedWords, Dictionary<char,int> userInputDictionary)
+    private Word[] GetSupportedWords(Word[] loadedWords, Dictionary<char, int> userInputDictionary)
     {
         var acceptedWords =
             new List<Word>();
@@ -147,7 +147,7 @@ public class AnagramSolverService : IAnagramSolver
         var threeWordAnagrams = new HashSet<string>();
         foreach (Word firstWord in allWords)
         {
-            
+
             if (!CanUseWord(
                 inputLetters,
                 firstWord.WordLetterCount))
@@ -177,7 +177,7 @@ public class AnagramSolverService : IAnagramSolver
 
                 foreach (Word thirdWord in allWords)
                 {
-                
+
                     if (!CanUseWord(
                         afterSecondWord,
                         thirdWord.WordLetterCount))

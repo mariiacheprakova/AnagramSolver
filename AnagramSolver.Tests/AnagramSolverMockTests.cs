@@ -5,12 +5,10 @@ using FluentAssertions;
 using Moq;
 
 namespace AnagramSolver.Tests;
-
 public class AnagramSolverServiceMockTests
 {
     private readonly Mock<IWordRepository> _repository = new();
     private readonly Mock<IWordFilter> _filterChain = new();
-
     public AnagramSolverServiceMockTests()
     {
         _filterChain
