@@ -1,5 +1,4 @@
 ﻿@model AnagramSolver.WebApp.Models.WordsViewModel
-
 <h1>Words</h1>
 <p>Loaded words: @Model.Words.Count</p>
 <p>Page @Model.CurrentPage of @Model.TotalPages</p>
@@ -16,7 +15,6 @@ else
             <li>@word.Text - @word.Type</li>
         }
     </ul>
-
 }
 @if(Model.HasPreviousPage)
 {
@@ -26,8 +24,6 @@ else
     Previous
 </a>
 }
-
-
 @if(Model.HasNextPage)
 {
     <a asp-controller ="Words"

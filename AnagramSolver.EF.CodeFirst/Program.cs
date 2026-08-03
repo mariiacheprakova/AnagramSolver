@@ -1,25 +1,18 @@
-﻿using AnagramSolver.EF.CodeFirst.Models;
+﻿using AnagramSolver.EF.CodeFirst.Data;
+using AnagramSolver.EF.CodeFirst.Import;
 using Microsoft.EntityFrameworkCore;
-
-namespace AnagramSolver.EF.CodeFirst.Data;
-
-public class AnagramDbContext : DbContext
-{
-    public DbSet<Word> Words => Set<Word>();
-
-    public DbSet<Category> Categories => Set<Category>();
-
-    public DbSet<SearchLog> SearchLogs => Set<SearchLog>();
-
-    protected override void OnConfiguring(
-        DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.UseSqlServer(
-            """
-            Server=localhost;
-            Database=AnagramSolver_CF;
-            Trusted_Connection=True;
-            TrustServerCertificate=True;
-            """);
-    }
-}
+var options =
+    new DbContextOptionsBuilder<AnagramDbContext>()
+        .UseSqlServer(
+            "Server=localhost;" +
+            "Database=AnagramSolver_CF;" +
+            "Trusted_Connection=True;" +
+            "TrustServerCertificate=True;")
+        .Options;
+await using var context =
+    new AnagramDbContext(options);
+var seeder =
+    new WordDatabaseSeeder(context);
+string dictionaryPath =
+    @"C:\Users\marii\Desktop\projectSolver\AnagramSolver.WebApp\zodynas.txt";
+await seeder.ImportAsync(dictionaryPath);

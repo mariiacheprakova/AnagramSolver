@@ -2,20 +2,20 @@
 using AnagramSolver.Contracts.Models;
 
 namespace AnagramSolver.BusinessLogic;
-
 public class AnagramSolverService : IAnagramSolver
 {
     private readonly IWordRepository _wordRepository;
     private readonly IWordFilter _filterChain;
-
+    private readonly ISearchLogRepository _searchLogRepository;
     public AnagramSolverService(
         IWordRepository wordRepository,
-        IWordFilter filterChain)
+        IWordFilter filterChain,
+        ISearchLogRepository searchLogRepository)
     {
         _wordRepository = wordRepository;
         _filterChain = filterChain;
+        _searchLogRepository = searchLogRepository;
     }
-
     public async Task<IReadOnlyCollection<string>> GetAnagramsAsync(
         Dictionary<char, int> userInputDictionary,
         CancellationToken cancellationToken = default)
@@ -43,7 +43,6 @@ public class AnagramSolverService : IAnagramSolver
                     allWords))
             .ToHashSet();
     }
-
     private Word[] GetSupportedWords(
         Word[] loadedWords,
         Dictionary<char, int> userInputDictionary)
@@ -57,7 +56,6 @@ public class AnagramSolverService : IAnagramSolver
                 $"{word.Text}|{word.Type}")
             .ToArray();
     }
-
     private HashSet<string> FindOneWordAnagrams(
         Dictionary<char, int> inputLetters,
         Word[] allWords)
@@ -70,7 +68,6 @@ public class AnagramSolverService : IAnagramSolver
             .Select(word => word.Text)
             .ToHashSet();
     }
-
     private HashSet<string> FindTwoWordAnagrams(
         Dictionary<char, int> inputLetters,
         Word[] allWords)
@@ -108,7 +105,6 @@ public class AnagramSolverService : IAnagramSolver
 
         return results;
     }
-
     private HashSet<string> FindThreeWordAnagrams(
         Dictionary<char, int> inputLetters,
         Word[] allWords)
@@ -164,10 +160,8 @@ public class AnagramSolverService : IAnagramSolver
                 }
             }
         }
-
         return results;
     }
-
     private bool CanUseWord(
         Dictionary<char, int> availableLetters,
         Dictionary<char, int> requiredLetters)
@@ -179,7 +173,6 @@ public class AnagramSolverService : IAnagramSolver
             &&
             availableCount >= requiredLetter.Value);
     }
-
     private Dictionary<char, int> SubtractLetters(
         Dictionary<char, int> availableLetters,
         Dictionary<char, int> usedLetters)
@@ -198,10 +191,8 @@ public class AnagramSolverService : IAnagramSolver
                     usedLetter.Key);
             }
         }
-
         return remainingLetters;
     }
-
     private bool UsesAllRemainingLetters(
         Word word,
         Dictionary<char, int> remainingLetters)
@@ -220,7 +211,6 @@ public class AnagramSolverService : IAnagramSolver
 
         return lettersAfterWord.Count == 0;
     }
-
     private bool DictionariesAreEqual(
         Dictionary<char, int> first,
         Dictionary<char, int> second)
@@ -234,7 +224,6 @@ public class AnagramSolverService : IAnagramSolver
                 &&
                 secondValue == pair.Value);
     }
-
     private string FormatTwoWords(
         Word firstWord,
         Word secondWord)
@@ -274,7 +263,6 @@ public class AnagramSolverService : IAnagramSolver
 
         return $"{firstWord.Text} {secondWord.Text}";
     }
-
     private bool TryFormatThreeWords(
         Word firstWord,
         Word secondWord,
@@ -323,7 +311,6 @@ public class AnagramSolverService : IAnagramSolver
             formattedResult = string.Empty;
             return false;
         }
-
         formattedResult =
             $"{adjectives![0].Text} " +
             $"{nouns![0].Text} " +

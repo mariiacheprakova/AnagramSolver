@@ -2,37 +2,45 @@
 
 namespace AnagramSolver.BusinessLogic;
 
-public class WordFileParser
+public static class WordFileParser
 {
-    public static Word[] ParseWords(IList<string> lines)
+    public static Word[] ParseWords(
+        IList<string> lines)
     {
+        var seenWords =
+            new HashSet<string>(
+                StringComparer.OrdinalIgnoreCase);
 
-        var letterCounter = new LetterCounter();
-        var seenWords = new HashSet<string>();
-
-        var temporaryWords = lines.Select(line =>
+        return lines
+            .Select(line => line.Split(
+                (char[]?)null,
+                StringSplitOptions.RemoveEmptyEntries
+                | StringSplitOptions.TrimEntries))
+            .Where(parts => parts.Length >= 2)
+            .Select(parts =>
             {
-                var parts = line.Split();
+                string wordText = parts[0];
+                string wordType = parts[1];
 
-                var wordText = parts[0];
-                var wordType = parts[1];
-                return (
-                wordText,
-                wordType,
-                key: $"{wordText}| {wordType}"
-                );
-
+                return new
+                {
+                    WordText = wordText,
+                    WordType = wordType,
+                    Key = $"{wordText}|{wordType}"
+                };
             })
-            .Where(parts => seenWords.Add(parts.key))
-            .Select((parts, index) => new Word
-            {
-                Text = parts.wordText,
-                Type = parts.wordType,
-                Id = index + 1,
-                WordLetterCount = LetterCounter.CountLetters(parts.wordText)
-            })
+            .Where(parsedWord =>
+                seenWords.Add(parsedWord.Key))
+            .Select((parsedWord, index) =>
+                new Word
+                {
+                    Id = index + 1,
+                    Text = parsedWord.WordText,
+                    Type = parsedWord.WordType,
+                    WordLetterCount =
+                        LetterCounter.CountLetters(
+                            parsedWord.WordText)
+                })
             .ToArray();
-
-        return temporaryWords;
     }
 }

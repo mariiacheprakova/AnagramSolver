@@ -1,14 +1,29 @@
 ﻿using AnagramSolver.EF.DatabaseFirst.Data;
 using Microsoft.EntityFrameworkCore;
 
-await using var context = new AnagramDbContext();
+var options =
+    new DbContextOptionsBuilder<AnagramDbContext>()
+        .UseSqlServer(
+            "Server=localhost;" +
+            "Database=AnagramSolver;" +
+            "Trusted_Connection=True;" +
+            "TrustServerCertificate=True;")
+        .Options;
 
-var words = await context.Words
-    .Where(word => word.Value.Length > 4)
-    .OrderBy(word => word.Value.Length)
-    .ToListAsync();
+await using var context =
+    new AnagramDbContext(options);
 
-foreach (var word in words)
+var longWords =
+    await context.Words
+        .AsNoTracking()
+        .Where(word => word.Value.Length > 4)
+        .OrderBy(word => word.Value.Length)
+        .ToListAsync();
+
+Console.WriteLine("--- Words longer than 4 characters ---");
+
+foreach (var word in longWords)
 {
-    Console.WriteLine(word.Value);
+    Console.WriteLine(
+        $"{word.Value} — length: {word.Value.Length}");
 }
