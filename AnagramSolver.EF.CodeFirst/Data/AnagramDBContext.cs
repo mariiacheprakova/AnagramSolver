@@ -9,13 +9,17 @@ public class AnagramDbContext : DbContext
 
     public DbSet<Category> Categories => Set<Category>();
 
+    public DbSet<SearchLog> SearchLogs => Set<SearchLog>();
+
     protected override void OnConfiguring(
         DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseSqlServer(
-            "Server=localhost;" +
-            "Database=AnagramSolver_CF;" +
-            "Trusted_Connection=True;" +
-            "TrustServerCertificate=True;");
+            """
+            Server=localhost;
+            Database=AnagramSolver_CF;
+            Trusted_Connection=True;
+            TrustServerCertificate=True;
+            """);
     }
 }
