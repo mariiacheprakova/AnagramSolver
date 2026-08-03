@@ -1,5 +1,4 @@
 ﻿namespace AnagramSolver.Contracts.Models;
-
 public static class SupportedWordTypes
 {
     public const string Adjective = "bdv";

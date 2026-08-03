@@ -1,6 +1,9 @@
 using AnagramSolver.BusinessLogic;
+using AnagramSolver.BusinessLogic.Decorators;
+using AnagramSolver.BusinessLogic.Filters;
 using AnagramSolver.Contracts;
 using AnagramSolver.Contracts.Models;
+using ILogger = AnagramSolver.Contracts.ILogger;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,34 +17,91 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<IWordRepository, FileWordRepository>();
-builder.Services.AddScoped<IAnagramSolver, AnagramSolverService>();
+// Services
+builder.Services.AddScoped<IWordRepository, FileWordRepository>();
 builder.Services.AddScoped<LetterCounter>();
+
+// Cache
+builder.Services.AddSingleton<
+    MemoryCache<IReadOnlyCollection<string>>>();
+
+// Logger
+builder.Services.AddSingleton<AnagramSolver.Contracts.ILogger, Logging>();
+
+// AnagramSolver with Chain of Responsibility + Decorators
+builder.Services.AddScoped<IAnagramSolver>(static serviceProvider =>
+{
+    IWordRepository repository =
+        serviceProvider.GetRequiredService<IWordRepository>();
+
+    ILogger logger =
+        serviceProvider.GetRequiredService<ILogger>();
+
+    MemoryCache<IReadOnlyCollection<string>> cache =
+        serviceProvider.GetRequiredService<
+            MemoryCache<IReadOnlyCollection<string>>>();
+
+    var lengthFilter =
+        new LengthFilter();
+
+    var letterFilter =
+        new LetterFilter();
+
+    var supportedWordTypeFilter =
+        new SupportedWordTypeFilter();
+
+    lengthFilter.SetNext(letterFilter);
+    letterFilter.SetNext(supportedWordTypeFilter);
+
+    IAnagramSolver solver =
+        new AnagramSolverService(
+            repository,
+            lengthFilter);
+
+    solver =
+        new CacheDecorator(
+            solver,
+            cache);
+
+    solver =
+        new LoggingDecorator(
+            logger,
+            solver);
+
+    return solver;
+});
+
 builder.Services.AddSession();
 
 var app = builder.Build();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
+
 app.UseRouting();
+
 app.UseSession();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
 app.MapStaticAssets();
 
-app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}")
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
 app.Run();

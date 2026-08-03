@@ -1,5 +1,4 @@
 ﻿namespace AnagramSolver.Contracts.Models;
-
 public class Word
 {
     public string? Text { get; init; }

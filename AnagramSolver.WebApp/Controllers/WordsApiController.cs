@@ -1,4 +1,5 @@
-﻿using AnagramSolver.Contracts;
+﻿using AnagramSolver.BusinessLogic;
+using AnagramSolver.Contracts;
 using AnagramSolver.Contracts.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,10 +10,11 @@ namespace AnagramSolver.WebApp.Controllers;
 public class WordsApiController : ControllerBase
 {
     private readonly IWordRepository _wordRepository;
-
-    public WordsApiController(IWordRepository wordRepository)
+    private readonly MemoryCache<IReadOnlyCollection<string>> _cache;
+    public WordsApiController(IWordRepository wordRepository, MemoryCache<IReadOnlyCollection<string>> cache)
     {
         _wordRepository = wordRepository;
+        _cache = cache;
     }
 
     [HttpGet]
@@ -34,11 +36,13 @@ public class WordsApiController : ControllerBase
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<Word>> GetWordByIdAsync(
-        int id,
-        CancellationToken cancellationToken
-    )
+            int id,
+            CancellationToken cancellationToken)
     {
-        Word? word = await _wordRepository.GetWordByIdAsync(id, cancellationToken);
+        Word? word =
+            await _wordRepository.GetWordByIdAsync(
+                id,
+                cancellationToken);
 
         if (word is null)
         {
@@ -51,23 +55,36 @@ public class WordsApiController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Word>> AddWordAsync(
         Word word,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
-        Word addedWord = await _wordRepository.AddWordAsync(word, cancellationToken);
+        Word addedWord =
+            await _wordRepository.AddWordAsync(
+                word,
+                cancellationToken);
 
-        return CreatedAtAction(nameof(GetWordByIdAsync), new { id = addedWord.Id }, addedWord);
+        _cache.Clear();
+
+        return CreatedAtAction(
+            nameof(GetWordByIdAsync),
+            new { id = addedWord.Id },
+            addedWord);
     }
 
     [HttpDelete("{id:int}")]
-    public async Task<IActionResult> DeleteWordAsync(int id, CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteWordAsync(
+        int id,
+        CancellationToken cancellationToken)
     {
-        bool deleted = await _wordRepository.DeleteWordByIdAsync(id, cancellationToken);
+        bool deleted =
+            await _wordRepository.DeleteWordByIdAsync(
+                id,
+                cancellationToken);
 
         if (!deleted)
         {
             return NotFound();
         }
+        _cache.Clear();
 
         return NoContent();
     }

@@ -1,7 +1,6 @@
 ﻿using AnagramSolver.Contracts.Models;
 
 namespace AnagramSolver.BusinessLogic;
-
 public class WordFileParser
 {
     public static Word[] ParseWords(IList<string> lines)
@@ -43,7 +42,6 @@ public class WordFileParser
 
         return result;
     }
-
     public static Dictionary<char, int> CountLetters(string text)
     {
         var letterCount = new Dictionary<char, int>();

@@ -3,20 +3,17 @@ using AnagramSolver.Contracts;
 using AnagramSolver.Contracts.Models;
 
 namespace AnagramSolver.BusinessLogic;
-
 public class FileWordRepository : IWordRepository
 {
     private readonly AnagramSettings _settings;
     private readonly WordFileParser _parser;
 
     private Word[]? _cachedWords;
-
     public FileWordRepository(AnagramSettings settings)
     {
         _settings = settings;
         _parser = new WordFileParser();
     }
-
     public async Task<Word[]> GetAllWordsAsync(CancellationToken cancellationToken = default)
     {
         if (_cachedWords is not null)
@@ -68,7 +65,6 @@ public class FileWordRepository : IWordRepository
 
         return word;
     }
-
     public async Task<bool> DeleteWordByIdAsync(
         int id,
         CancellationToken cancellationToken = default

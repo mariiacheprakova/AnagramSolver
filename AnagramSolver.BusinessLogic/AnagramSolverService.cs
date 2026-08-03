@@ -1,82 +1,76 @@
 ﻿using AnagramSolver.Contracts;
 using AnagramSolver.Contracts.Models;
-
+using System.Collections.Immutable;
 namespace AnagramSolver.BusinessLogic;
 
 public class AnagramSolverService : IAnagramSolver
 {
     private readonly IWordRepository _wordRepository;
+    private readonly IWordFilter _filterChain;
 
-    public AnagramSolverService(IWordRepository wordRepository) 
+    public AnagramSolverService(IWordRepository wordRepository, IWordFilter filterChain) // constructor 
     {
         _wordRepository = wordRepository;
+        _filterChain = filterChain;
     }
 
     public async Task<IReadOnlyCollection<string>> GetAnagramsAsync(
         Dictionary<char, int> userInputDictionary, CancellationToken cancellationToken = default)
     {
+
+
         Word[] loadedWords = await
             _wordRepository.GetAllWordsAsync(cancellationToken);
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        Word[] allWords = GetSupportedWords(loadedWords);
+        Word[] allWords = GetSupportedWords(loadedWords, userInputDictionary);
 
         var results = new HashSet<string>();
 
-        var threeWordAnagrams = FindThreeWordAnagrams(userInputDictionary, allWords,cancellationToken);
-        var twoWordAnagrams = FindTwoWordAnagrams(userInputDictionary, allWords,cancellationToken);
+        var threeWordAnagrams = FindThreeWordAnagrams(userInputDictionary, allWords, cancellationToken);
+        var twoWordAnagrams = FindTwoWordAnagrams(userInputDictionary, allWords, cancellationToken);
         var oneWordAnagrams = FindOneWordAnagrams(userInputDictionary, allWords);
+
 
         results.UnionWith(threeWordAnagrams);
         results.UnionWith(twoWordAnagrams);
         results.UnionWith(oneWordAnagrams);
 
+
+
+
         return results;
     }
 
-    private Word[] GetSupportedWords(Word[] loadedWords)
+    private Word[] GetSupportedWords(Word[] loadedWords, Dictionary<char, int> userInputDictionary)
     {
-        var temporaryWords =
-            new Word[loadedWords.Length];
+        var acceptedWords =
+            new List<Word>();
 
-        var count = 0;
-
-        var seenWords =
-            new HashSet<string>();
+        var seenWords = new HashSet<string>();
 
         foreach (Word word in loadedWords)
         {
-            bool hasSupportedType =
-                word.Type == SupportedWordTypes.Adjective ||
-                word.Type == SupportedWordTypes.Noun ||
-                word.Type == SupportedWordTypes.Verb;
-               
+            bool passedFilters =
+               _filterChain.Handle(word, userInputDictionary);
 
-            if (!hasSupportedType)
+            if (!passedFilters)
             {
                 continue;
             }
 
-            string key = $"{word.Text}|{word.Type}";
+            string duplicateKey = $"{word.Text}|{word.Type}";
 
-            if (!seenWords.Add(key))
+            if (!seenWords.Add(duplicateKey))
             {
                 continue;
             }
 
-            temporaryWords[count] = word;
-            count++;
+            acceptedWords.Add(word);
         }
 
-        Word[] result = new Word[count];
-
-        Array.Copy(
-            temporaryWords,
-            result,
-            count);
-
-        return result;
+        return acceptedWords.ToArray();
     }
 
     private HashSet<string> FindOneWordAnagrams(
@@ -153,7 +147,7 @@ public class AnagramSolverService : IAnagramSolver
         var threeWordAnagrams = new HashSet<string>();
         foreach (Word firstWord in allWords)
         {
-            
+
             if (!CanUseWord(
                 inputLetters,
                 firstWord.WordLetterCount))
@@ -183,7 +177,7 @@ public class AnagramSolverService : IAnagramSolver
 
                 foreach (Word thirdWord in allWords)
                 {
-                
+
                     if (!CanUseWord(
                         afterSecondWord,
                         thirdWord.WordLetterCount))

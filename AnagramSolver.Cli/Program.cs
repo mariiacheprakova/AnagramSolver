@@ -1,98 +1,109 @@
-﻿using System.Net.Http.Json;
-using AnagramSolver.BusinessLogic;
+﻿using AnagramSolver.BusinessLogic;
+using AnagramSolver.Contracts;
+using System.Net.Http.Json;
 
-namespace AnagramSolver.Cli
+namespace AnagramSolver.Cli;
+class Program
 {
-    class Program
+    static async Task Main(string[] args)
     {
-        static async Task Main(string[] args)
+        ILogger logger = new Logging();
+        var settings =
+            ConfigurationLoader.LoadAnagramSettings();
+
+        var validator =
+            new UserInputValidation(settings);
+
+        ConsoleConfiguration.ConfigureUtf8Encoding();
+
+        string input = ReadValidUserInput();
+
+        using var client = new HttpClient
         {
-            var settings = ConfigurationLoader.LoadAnagramSettings();
+            BaseAddress = new Uri("http://localhost:5053")
+        };
 
-            var validator = new UserInputValidation(settings);
+        try
+        {
+            string encodedInput = Uri.EscapeDataString(input);
 
-            ConsoleConfiguration.ConfigureUtf8Encoding();
+            var results =
+                await client.GetFromJsonAsync<List<string>>(
+                    $"/api/anagrams/{encodedInput}");
 
-            var input = ReadValidUserInput();
+            results ??= new List<string>();
 
-            using var client = new HttpClient();
-
-            client.BaseAddress = new Uri("http://localhost:5053");
-
-            try
+            if (results.Count == 0)
             {
-                string encodedInput = Uri.EscapeDataString(input);
+                logger.Log("No anagrams were found.");
+            }
+            else
+            {
+                logger.Log(
+                    $"Found overall {results.Count} anagrams:");
 
-                var results = await client.GetFromJsonAsync<List<string>>(
-                    $"/api/anagrams/{encodedInput}"
-                );
-                results ??= new List<string>();
+                int countToPrint = Math.Min(
+                    results.Count,
+                    settings.MaxAnagramsCount);
 
-                if (results.Count == 0)
+                logger.Log(
+                    $"Maximum anagrams displayed: {countToPrint}");
+
+                int printedCount = 0;
+
+                foreach (string result in results)
                 {
-                    Console.WriteLine("No anagrams were found.");
+                    if (printedCount >= countToPrint)
+                    {
+                        break;
+                    }
+
+                    logger.Log(result);
+                    printedCount++;
+                }
+            }
+        }
+        catch (HttpRequestException exception)
+        {
+            logger.Log(
+                $"Could not contact the API: {exception.Message}");
+        }
+
+        string ReadValidUserInput()
+        {
+            logger.Log("Enter a phrase:");
+
+            logger.Log(
+                $"Only letters and spaces allowed. " +
+                $"Must include at least " +
+                $"{settings.MinimumWordLength} characters.");
+
+            string? input = Console.ReadLine();
+
+            while (true)
+            {
+                if (!validator.ValidateLength(input))
+                {
+                    logger.Log(
+                        $"Input string must be at least " +
+                        $"{settings.MinimumWordLength} characters.");
+                }
+                else if (!validator.ContainsOnlyLettersAndWhitespace(input))
+                {
+                    logger.Log(
+                        "Input string must contain only spaces and letters.");
                 }
                 else
                 {
-                    Console.WriteLine($"Found overall {results.Count} anagrams:");
+                    logger.Log($"Entered string: {input}");
 
-                    int countToPrint = Math.Min(results.Count, settings.MaxAnagramsCount);
-
-                    Console.WriteLine($"Maximum anagrams displayed: {countToPrint}");
-
-                    int printedCount = 0;
-
-                    foreach (string result in results)
-                    {
-                        if (printedCount >= countToPrint)
-                        {
-                            break;
-                        }
-
-                        Console.WriteLine(result);
-                        printedCount++;
-                    }
+                    return input!
+                        .Trim()
+                        .ToLower();
                 }
-            }
-            catch (HttpRequestException exception)
-            {
-                Console.WriteLine($"Could not contact the API: {exception.Message}");
-            }
-            string ReadValidUserInput()
-            {
-                Console.WriteLine("Enter a phrase: ");
 
-                Console.WriteLine(
-                    $"Only letters and spaces allowed. "
-                        + $"Must include at least "
-                        + $"{settings.MinimumWordLength} characters."
-                );
-
-                string? input = Console.ReadLine();
-
-                while (true)
-                {
-                    if (!validator.ValidateLength(input))
-                    {
-                        Console.WriteLine(
-                            $"Input string must be at least "
-                                + $"{settings.MinimumWordLength} characters."
-                        );
-                    }
-                    else if (!validator.ContainsOnlyLettersAndWhitespace(input))
-                    {
-                        Console.WriteLine("Input string must contain only spaces and letters.");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Entered string: {input}");
-
-                        return input!.Trim().ToLower();
-                    }
-
-                    Console.WriteLine("Try again.");
-                    input = Console.ReadLine();
-                }
+                logger.Log("Try again.");
+                input = Console.ReadLine();
             }
         }
     }

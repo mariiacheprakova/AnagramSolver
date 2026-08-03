@@ -5,27 +5,43 @@ using FluentAssertions;
 using Moq;
 
 namespace AnagramSolver.Tests;
-
 public class AnagramSolverServiceMockTests
 {
     private readonly Mock<IWordRepository> _repository = new();
+    private readonly Mock<IWordFilter> _filterChain = new();
+    public AnagramSolverServiceMockTests()
+    {
+        _filterChain
+            .Setup(filter => filter.Handle(
+                It.IsAny<Word>(),
+                It.IsAny<Dictionary<char, int>>()))
+            .Returns(true);
+    }
 
     [Fact]
     public async Task GetAnagramsAsync_ShouldReturnEmpty_WhenInputIsEmpty()
     {
         // Arrange
         _repository
-            .Setup(r => r.GetAllWordsAsync(It.IsAny<CancellationToken>()))
+            .Setup(repository =>
+                repository.GetAllWordsAsync(
+                    It.IsAny<CancellationToken>()))
             .ReturnsAsync(Array.Empty<Word>());
 
-        var solver = new AnagramSolverService(_repository.Object);
-        var input = new Dictionary<char, int>();
+        var solver =
+            new AnagramSolverService(
+                _repository.Object,
+                _filterChain.Object);
+
+        var input =
+            new Dictionary<char, int>();
 
         // Act
-        var result = await solver.GetAnagramsAsync(input);
+        IReadOnlyCollection<string> result =
+            await solver.GetAnagramsAsync(input);
 
-        //Assert
-        Assert.Empty(result);
+        // Assert
+        result.Should().BeEmpty();
     }
 
     [Fact]
@@ -55,13 +71,19 @@ public class AnagramSolverServiceMockTests
         ];
 
         _repository
-            .Setup(r => r.GetAllWordsAsync(It.IsAny<CancellationToken>()))
+            .Setup(repository =>
+                repository.GetAllWordsAsync(
+                    It.IsAny<CancellationToken>()))
             .ReturnsAsync(words);
 
-        var solver = new AnagramSolverService(_repository.Object);
+        var solver =
+            new AnagramSolverService(
+                _repository.Object,
+                _filterChain.Object);
 
         // Act
-        var result = await solver.GetAnagramsAsync(input);
+        IReadOnlyCollection<string> result =
+            await solver.GetAnagramsAsync(input);
 
         // Assert
         result.Should().BeEmpty();
@@ -96,7 +118,10 @@ public class AnagramSolverServiceMockTests
             .Setup(r => r.GetAllWordsAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(words);
 
-        var solver = new AnagramSolverService(_repository.Object);
+        var solver =
+            new AnagramSolverService(
+                _repository.Object,
+                _filterChain.Object);
 
         // Act
         var result = await solver.GetAnagramsAsync(input);
