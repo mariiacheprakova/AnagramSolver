@@ -1,4 +1,5 @@
-﻿using AnagramSolver.Contracts;
+﻿using AnagramSolver.BusinessLogic;
+using AnagramSolver.Contracts;
 using AnagramSolver.Contracts.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,26 +10,35 @@ namespace AnagramSolver.WebApp.Controllers;
 public class WordsApiController : ControllerBase
 {
     private readonly IWordRepository _wordRepository;
+    private readonly MemoryCache<IReadOnlyCollection<string>> _cache;
 
-    public WordsApiController(IWordRepository wordRepository)
+    public WordsApiController(IWordRepository wordRepository, MemoryCache<IReadOnlyCollection<string>> cache)
     {
         _wordRepository = wordRepository;
+        _cache = cache;
     }
 
     [HttpGet]
     public async Task<ActionResult<IReadOnlyCollection<Word>>> GetWordsAsync(
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
-        Word[] words =
-            await _wordRepository.GetAllWordsAsync(cancellationToken);
+        var headers = Request.Headers;
+        var method = Request.Method;
+        var path = Request.Path;
+        var query = Request.Query;
+        var ip = HttpContext.Connection.RemoteIpAddress;
+        var cookies = Request.Cookies;
+
+        Word[] words = await _wordRepository.GetAllWordsAsync(cancellationToken);
 
         return Ok(words);
     }
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<Word>> GetWordByIdAsync(
-        int id,
-        CancellationToken cancellationToken)
+            int id,
+            CancellationToken cancellationToken)
     {
         Word? word =
             await _wordRepository.GetWordByIdAsync(
@@ -53,6 +63,8 @@ public class WordsApiController : ControllerBase
                 word,
                 cancellationToken);
 
+        _cache.Clear();
+
         return CreatedAtAction(
             nameof(GetWordByIdAsync),
             new { id = addedWord.Id },
@@ -73,6 +85,7 @@ public class WordsApiController : ControllerBase
         {
             return NotFound();
         }
+        _cache.Clear();
 
         return NoContent();
     }

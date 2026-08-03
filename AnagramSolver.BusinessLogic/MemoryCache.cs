@@ -6,6 +6,6 @@ public class MemoryCache<T>
 
     public void Set(string key, T value) => _cache[key] = value;
     public bool TryGet(string key, out T value) => _cache.TryGetValue(key, out value!);
-
+    public void Clear() => _cache.Clear();
 }
 
