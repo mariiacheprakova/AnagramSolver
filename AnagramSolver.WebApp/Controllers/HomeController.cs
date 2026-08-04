@@ -6,12 +6,11 @@ using AnagramSolver.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AnagramSolver.WebApp.Controllers;
-
 public class HomeController : Controller
 {
     private readonly IAnagramSolver _anagramSolver;
-
-    public HomeController(IAnagramSolver anagramSolver)
+    private readonly LetterCounter _letterCounter;
+    public HomeController(IAnagramSolver anagramSolver, LetterCounter letterCounter)
     {
         _anagramSolver = anagramSolver;
     }
@@ -62,9 +61,7 @@ public class HomeController : Controller
                     cancellationToken);
         }
 
-        string? lastSearch =
-            Request.Cookies["lastSearch"];
-
+        var lastSearch = Request.Cookies["lastSearch"];
         ViewBag.LastSearch = lastSearch;
         ViewBag.SearchHistory = searchHistory;
 

@@ -1,17 +1,16 @@
-﻿namespace AnagramSolver.BusinessLogic.Decorators;
+﻿using AnagramSolver.Contracts;
+
+namespace AnagramSolver.BusinessLogic.Decorators;
 
 public class CacheDecorator : IAnagramSolver
 {
     private readonly IAnagramSolver _inner;
     private readonly MemoryCache<IReadOnlyCollection<string>> _cache;
-
-
     public CacheDecorator(IAnagramSolver inner, MemoryCache<IReadOnlyCollection<string>> cache)
     {
         _inner = inner;
         _cache = cache;
     }
-
     public async Task<IReadOnlyCollection<string>> GetAnagramsAsync(Dictionary<char, int> userInputDictionary
         , CancellationToken cancellationToken)
     {

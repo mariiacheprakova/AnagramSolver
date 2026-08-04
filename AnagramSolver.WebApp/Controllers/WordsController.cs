@@ -2,11 +2,11 @@
 using AnagramSolver.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 
+namespace AnagramSolver.WebApp.Controllers;
 public class WordsController : Controller
 {
     private const int PageSize = 100;
     private readonly IWordRepository _wordRepository;
-
     public WordsController(IWordRepository wordRepository)
     {
         _wordRepository = wordRepository;

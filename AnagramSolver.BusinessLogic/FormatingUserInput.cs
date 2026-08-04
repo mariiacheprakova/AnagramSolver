@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace AnagramSolver.BusinessLogic
 {
@@ -18,10 +15,9 @@ namespace AnagramSolver.BusinessLogic
         {
             return string.Concat(words);
         }
-
         public Dictionary<char, int> CountLetters(string input)
         {
-            return LetterCounter.CountLetters(input);
+            return _letterCounter.CountLetters(input);
         }
     }
 }

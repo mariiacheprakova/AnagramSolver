@@ -3,7 +3,6 @@ using AnagramSolver.Contracts;
 using AnagramSolver.Contracts.Models;
 
 namespace AnagramSolver.BusinessLogic;
-
 public class FileWordRepository : IWordRepository
 {
     private readonly AnagramSettings _settings;
@@ -13,8 +12,8 @@ public class FileWordRepository : IWordRepository
     public FileWordRepository(AnagramSettings settings)
     {
         _settings = settings;
+        _parser = new WordFileParser();
     }
-
     public async Task<Word[]> GetAllWordsAsync(CancellationToken cancellationToken = default)
     {
         if (_cachedWords is not null)
@@ -46,8 +45,10 @@ public class FileWordRepository : IWordRepository
         bool wordAlreadyExists = existingWords.Any(existingWord => existingWord.Text == word.Text && existingWord.Type == word.Type);
         if (wordAlreadyExists)
         {
-            throw new InvalidOperationException($"The word '{word.Text}' with type '{word.Type}' already exists.");
-
+            if (existingWord.Text == word.Text && existingWord.Type == word.Type)
+            {
+                throw new InvalidOperationException("Word already exists.");
+            }
         }
 
         string newLine = $"{word.Text} {word.Type}";
@@ -73,6 +74,18 @@ public class FileWordRepository : IWordRepository
     )
     {
         Word[] words = await GetAllWordsAsync(cancellationToken);
+
+        bool found = false;
+
+        List<string> remainingLines = new();
+
+        foreach (Word word in words)
+        {
+            if (word.Id == id)
+            {
+                found = true;
+                continue;
+            }
 
         bool wordExists = words.Any(word => word.Id == id);
 

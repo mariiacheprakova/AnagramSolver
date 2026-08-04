@@ -7,7 +7,6 @@ namespace AnagramSolver.WebApp.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-
 public class AnagramsController : ControllerBase
 {
     private readonly IAnagramSolver _anagramSolver;
@@ -20,7 +19,10 @@ public class AnagramsController : ControllerBase
     }
 
     [HttpGet("{word}")]
-    public async Task<ActionResult<IReadOnlyCollection<string>>> GetAnagramsAsync(string word, CancellationToken cancellationToken)
+    public async Task<ActionResult<IReadOnlyCollection<string>>> GetAnagramsAsync(
+        string word,
+        CancellationToken cancellationToken
+    )
     {
         var stopwatch = Stopwatch.StartNew();
 

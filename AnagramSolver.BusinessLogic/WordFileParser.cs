@@ -1,7 +1,6 @@
 ﻿using AnagramSolver.Contracts.Models;
 
 namespace AnagramSolver.BusinessLogic;
-
 public class WordFileParser
 {
     public static Word[] ParseWords(IList<string> lines)

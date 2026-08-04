@@ -1,16 +1,14 @@
-using AnagramSolver.BusinessLogic;
+﻿using AnagramSolver.BusinessLogic;
 using AnagramSolver.Contracts;
 using AnagramSolver.Contracts.Models;
 using FluentAssertions;
 using Moq;
 
 namespace AnagramSolver.Tests;
-
 public class AnagramSolverServiceMockTests
 {
     private readonly Mock<IWordRepository> _repository = new();
     private readonly Mock<IWordFilter> _filterChain = new();
-
     public AnagramSolverServiceMockTests()
     {
         _filterChain
@@ -50,13 +48,12 @@ public class AnagramSolverServiceMockTests
     public async Task GetAnagramsAsync_ShouldReturnEmpty_WhenNoAnagramsExist()
     {
         // Arrange
-        var input =
-            new Dictionary<char, int>
-            {
-                ['a'] = 1,
-                ['b'] = 1,
-                ['c'] = 1
-            };
+        var input = new Dictionary<char, int>
+        {
+            ['a'] = 1,
+            ['b'] = 1,
+            ['c'] = 1,
+        };
 
         Word[] words =
         [
@@ -102,13 +99,12 @@ public class AnagramSolverServiceMockTests
     public async Task GetAnagramsAsync_ShouldReturnOneWordAnagram_WhenExactMatchExists()
     {
         // Arrange
-        var input =
-            new Dictionary<char, int>
-            {
-                ['a'] = 1,
-                ['b'] = 1,
-                ['c'] = 1
-            };
+        var input = new Dictionary<char, int>
+        {
+            ['a'] = 1,
+            ['b'] = 1,
+            ['c'] = 1,
+        };
 
         Word[] words =
         [
@@ -124,11 +120,8 @@ public class AnagramSolverServiceMockTests
                 }
             }
         ];
-
         _repository
-            .Setup(repository =>
-                repository.GetAllWordsAsync(
-                    It.IsAny<CancellationToken>()))
+            .Setup(r => r.GetAllWordsAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(words);
 
         _filterChain
@@ -143,13 +136,10 @@ public class AnagramSolverServiceMockTests
                 _filterChain.Object);
 
         // Act
-        IReadOnlyCollection<string> result =
-            await solver.GetAnagramsAsync(input);
+        var result = await solver.GetAnagramsAsync(input);
 
         // Assert
-        result.Should()
-            .ContainSingle()
-            .Which.Should()
-            .Be("cab");
+        Assert.Single(result);
+        Assert.Contains("cab", result);
     }
 }

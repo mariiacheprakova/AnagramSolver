@@ -73,7 +73,8 @@ public class AnagramSolverService : IAnagramSolver
 
     private HashSet<string> FindTwoWordAnagrams(
         Dictionary<char, int> inputLetters,
-        Word[] allWords)
+        Word[] allWords,
+        CancellationToken cancellationToken)
     {
         var results = new HashSet<string>();
 
@@ -111,12 +112,14 @@ public class AnagramSolverService : IAnagramSolver
 
     private HashSet<string> FindThreeWordAnagrams(
         Dictionary<char, int> inputLetters,
-        Word[] allWords)
+        Word[] allWords,
+        CancellationToken cancellationToken)
     {
         var results = new HashSet<string>();
 
         foreach (Word firstWord in allWords)
         {
+
             if (!CanUseWord(
                     inputLetters,
                     firstWord.WordLetterCount))
