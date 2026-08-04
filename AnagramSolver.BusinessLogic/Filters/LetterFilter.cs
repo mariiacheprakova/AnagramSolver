@@ -1,6 +1,5 @@
 ﻿using AnagramSolver.Contracts.Models;
 namespace AnagramSolver.BusinessLogic.Filters;
-
 public class LetterFilter : WordFilterBase
 {
     public override bool Handle(Word word, Dictionary<char, int> availableLetters)

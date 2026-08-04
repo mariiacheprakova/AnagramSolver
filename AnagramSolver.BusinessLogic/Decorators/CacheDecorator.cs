@@ -1,7 +1,6 @@
 ﻿using AnagramSolver.Contracts;
 
 namespace AnagramSolver.BusinessLogic.Decorators;
-
 public class CacheDecorator : IAnagramSolver
 {
     private readonly IAnagramSolver _inner;
@@ -22,10 +21,8 @@ public class CacheDecorator : IAnagramSolver
 
         IReadOnlyCollection<string> results = await _inner.GetAnagramsAsync(userInputDictionary, cancellationToken);
         _cache.Set(key, results);
-
         return results;
     }
-
     private static string CreateCacheKey(Dictionary<char, int> userInputDictionary)
     {
         char[] letters = userInputDictionary.Keys.ToArray();
@@ -39,5 +36,4 @@ public class CacheDecorator : IAnagramSolver
         }
         return key;
     }
-
 }

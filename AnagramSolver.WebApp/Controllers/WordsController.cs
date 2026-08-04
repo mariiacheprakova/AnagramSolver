@@ -11,7 +11,6 @@ public class WordsController : Controller
     {
         _wordRepository = wordRepository;
     }
-
     public async Task<IActionResult> Index(
         CancellationToken cancellationToken,
         int page = 1)
@@ -37,7 +36,6 @@ public class WordsController : Controller
                 .Skip((page - 1) * PageSize)
                 .Take(PageSize)
                 .ToArray();
-
         var model =
             new WordsViewModel
             {
@@ -45,7 +43,6 @@ public class WordsController : Controller
                 CurrentPage = page,
                 TotalPages = totalPages
             };
-
         return View(model);
     }
 }

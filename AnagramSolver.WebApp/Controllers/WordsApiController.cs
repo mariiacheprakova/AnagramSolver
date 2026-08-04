@@ -54,9 +54,7 @@ public class WordsApiController : ControllerBase
             await _wordRepository.AddWordAsync(
                 word,
                 cancellationToken);
-
         _cache.Clear();
-
         return CreatedAtAction(
             nameof(GetWordByIdAsync),
             new { id = addedWord.Id },
@@ -78,7 +76,6 @@ public class WordsApiController : ControllerBase
             return NotFound();
         }
         _cache.Clear();
-
         return NoContent();
     }
 }

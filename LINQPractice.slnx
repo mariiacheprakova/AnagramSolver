@@ -1,4 +1,3 @@
 <Solution>
   <Project Path="LINQTasks/LINQTasks.csproj" />
-  <Project Path="SQLTasks/SQLTasks.csproj" />
 </Solution>

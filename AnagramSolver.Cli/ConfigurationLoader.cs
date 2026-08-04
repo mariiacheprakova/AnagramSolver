@@ -10,7 +10,6 @@ public static class ConfigurationLoader
             .SetBasePath(AppContext.BaseDirectory)
             .AddJsonFile("appsettings.json", optional: false)
             .Build();
-
         return configuration.GetSection("AnagramSettings").Get<AnagramSettings>()
             ?? throw new InvalidOperationException("AnagramSettings section is missing.");
     }

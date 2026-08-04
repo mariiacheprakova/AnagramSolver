@@ -10,8 +10,6 @@ namespace AnagramSolver.WebApp.Controllers;
 public class AnagramsController : ControllerBase
 {
     private readonly IAnagramSolver _anagramSolver;
-
-
     public AnagramsController(IAnagramSolver anagramSolver)
     {
         _anagramSolver = anagramSolver;
@@ -25,11 +23,9 @@ public class AnagramsController : ControllerBase
     )
     {
         var stopwatch = Stopwatch.StartNew();
-
         var wordDictionary = LetterCounter.CountLetters(word);
         var anagrams = await _anagramSolver.GetAnagramsAsync(wordDictionary, cancellationToken);
         stopwatch.Stop();
-
         Response.Headers.Append("X-Anagram-Count", anagrams.Count().ToString());
         Response.Headers.Append("X-Search-Duration-Ms", stopwatch.ElapsedMilliseconds.ToString());
         return Ok(anagrams);

@@ -4,13 +4,10 @@ using System.Text.RegularExpressions;
 
 class Program
 {
-
-
     record Student(int Id, string Name, int GroupId);
     record Groupings(int Id, string Name);
     public static void Main(string[] args)
     {
-
         var words = new List<string>
         { "alus", "sula", "la", "vanduo", "programavimas",
           "katinas", "saulė", "medis", "oras", "knyga" };
@@ -41,7 +38,7 @@ class Program
         var numbers = Enumerable.Range(1, 100).ToList();
 
         //1.Rasti visus lyginius skaičius
-        var neatNumbers = numbers.Where(n => n % 2 == 0).ToList();
+        var evenNumbers = numbers.Where(n => n % 2 == 0).ToList();
 
         //2.Rasti nelyginių skaičių sumą
         var oddNumbersSum = numbers.Where(n => n % 2 != 0).Sum();
@@ -53,7 +50,7 @@ class Program
         var groups = numbers.GroupBy(n => n <= 33 ? "small" : n <= 66 ? "Medium" : "Large").ToList();
 
         //5.Sukurti Dictionary: raktas = skaičius, reikšmė = ar pirminis
-        var dictionary = numbers.ToDictionary(n => n, n => n != 0);
+        var dictionary = numbers.ToDictionary(n => n, n => n % 2);
 
         var sentences = new List<string>
         { "LINQ yra galingas", "C# yra puiki kalba", "Generics ir Delegates" };
@@ -64,13 +61,10 @@ class Program
         //2.Rasti unikalius žodžius
         var uniqueWords = wordsSeparated.Distinct();
 
-
         //3.Suskaičiuoti kiek kartų kiekvienas žodis pasikartoja\
         var wordsRepeated = wordsSeparated.CountBy(w => w);
 
         // Task 3
-
-
         var students = new List<Student>
         {
             new(1, "Alice", 1),
@@ -91,18 +85,21 @@ class Program
 
         //1.Sujungti studentus su grupėmis naudojant Join
         var results = students.Join(groupings, s => s.GroupId, g => g.Id, (s, g) =>  new
-        {studentName = s.Name, groupName = g.Name}); 
+        {studentName = s.Name, groupName = g.Name});
 
         //2.Išvesti "Studentas X yra grupėje Y"
-        var student = results.First(r => r.studentName == "David");
-        Console.WriteLine($" Student{student.studentName} is in group {student.groupName}");
+        results.ForEach(r =>
+    Console.WriteLine($"Student {r.studentName} is in group {r.groupName}"));
 
         //3.Rasti grupes su daugiau nei 2 studentais(GroupJoin)
-        var twoStudentsGroups = groupings.GroupJoin(students, g => g.Id, s => s.GroupId, (g, s) => new { Groups = g, Students = s }).Where(g => g.Students.Count() > 2);
-
+        var studentGroups = groupings.GroupJoin(students, g => g.Id, s => s.GroupId, (g, s) => new { Groups = g, Students = s }).Where(g => g.Students.Count() > 2);
+        studentGroups.ForEach(g =>
+        {
+            Console.WriteLine($"Group: {g.Groups.Name}");
+            g.Students.ForEach(s => Console.WriteLine($"  - {s.Name}"));
+        });
 
         //Task 5
-
         var numbs = new List<int> { 1, 2, 3, 4, 5 };
         var query = numbs.Where(n => n % 2 != 0); 
         numbs.AddRange(new[] {30,22,11});
@@ -117,6 +114,5 @@ class Program
         {
             Console.WriteLine(n);
         }
-
     }
 }
