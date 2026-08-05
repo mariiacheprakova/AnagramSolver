@@ -6,16 +6,13 @@ using AnagramSolver.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AnagramSolver.WebApp.Controllers;
-
 public class HomeController : Controller
 {
     private readonly IAnagramSolver _anagramSolver;
-
     public HomeController(IAnagramSolver anagramSolver)
     {
         _anagramSolver = anagramSolver;
     }
-
     public async Task<IActionResult> Index(
         string? id,
         CancellationToken cancellationToken)
@@ -27,7 +24,6 @@ public class HomeController : Controller
 
         string? historyJson =
             HttpContext.Session.GetString("searchHistory");
-
         List<string> searchHistory =
             string.IsNullOrWhiteSpace(historyJson)
                 ? new List<string>()
@@ -45,32 +41,23 @@ public class HomeController : Controller
                 });
 
             searchHistory.Add(id);
-
             string updatedHistoryJson =
                 JsonSerializer.Serialize(searchHistory);
-
             HttpContext.Session.SetString(
                 "searchHistory",
                 updatedHistoryJson);
-
             Dictionary<char, int> idToDictionary =
                 LetterCounter.CountLetters(id);
-
             model.Anagrams =
                 await _anagramSolver.GetAnagramsAsync(
                     idToDictionary,
                     cancellationToken);
         }
-
-        string? lastSearch =
-            Request.Cookies["lastSearch"];
-
+        var lastSearch = Request.Cookies["lastSearch"];
         ViewBag.LastSearch = lastSearch;
         ViewBag.SearchHistory = searchHistory;
-
         return View(model);
     }
-
     public IActionResult Privacy()
     {
         return View();

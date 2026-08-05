@@ -2,12 +2,10 @@
 using AnagramSolver.Contracts.Models;
 
 namespace AnagramSolver.BusinessLogic;
-
 public class AnagramSolverService : IAnagramSolver
 {
     private readonly IWordRepository _wordRepository;
     private readonly IWordFilter _filterChain;
-
     public AnagramSolverService(
         IWordRepository wordRepository,
         IWordFilter filterChain)
@@ -15,16 +13,13 @@ public class AnagramSolverService : IAnagramSolver
         _wordRepository = wordRepository;
         _filterChain = filterChain;
     }
-
     public async Task<IReadOnlyCollection<string>> GetAnagramsAsync(
         Dictionary<char, int> userInputDictionary,
         CancellationToken cancellationToken = default)
     {
         Word[] loadedWords =
             await _wordRepository.GetAllWordsAsync(cancellationToken);
-
         cancellationToken.ThrowIfCancellationRequested();
-
         Word[] allWords =
             GetSupportedWords(
                 loadedWords,
@@ -36,14 +31,13 @@ public class AnagramSolverService : IAnagramSolver
             .Union(
                 FindTwoWordAnagrams(
                     userInputDictionary,
-                    allWords))
+                    allWords,cancellationToken))
             .Union(
                 FindThreeWordAnagrams(
                     userInputDictionary,
-                    allWords))
+                    allWords,cancellationToken))
             .ToHashSet();
     }
-
     private Word[] GetSupportedWords(
         Word[] loadedWords,
         Dictionary<char, int> userInputDictionary)
@@ -57,7 +51,6 @@ public class AnagramSolverService : IAnagramSolver
                 $"{word.Text}|{word.Type}")
             .ToArray();
     }
-
     private HashSet<string> FindOneWordAnagrams(
         Dictionary<char, int> inputLetters,
         Word[] allWords)
@@ -70,27 +63,27 @@ public class AnagramSolverService : IAnagramSolver
             .Select(word => word.Text)
             .ToHashSet();
     }
-
     private HashSet<string> FindTwoWordAnagrams(
         Dictionary<char, int> inputLetters,
-        Word[] allWords)
+        Word[] allWords,
+        CancellationToken cancellationToken)
     {
         var results = new HashSet<string>();
 
         foreach (Word firstWord in allWords)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (!CanUseWord(
                     inputLetters,
                     firstWord.WordLetterCount))
             {
                 continue;
             }
-
+    
             Dictionary<char, int> remainingLetters =
                 SubtractLetters(
                     inputLetters,
                     firstWord.WordLetterCount);
-
             IEnumerable<Word> matchingSecondWords =
                 allWords.Where(secondWord =>
                     UsesAllRemainingLetters(
@@ -99,24 +92,25 @@ public class AnagramSolverService : IAnagramSolver
 
             foreach (Word secondWord in matchingSecondWords)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 results.Add(
                     FormatTwoWords(
                         firstWord,
                         secondWord));
             }
         }
-
         return results;
     }
-
     private HashSet<string> FindThreeWordAnagrams(
         Dictionary<char, int> inputLetters,
-        Word[] allWords)
+        Word[] allWords,
+        CancellationToken cancellationToken)
     {
         var results = new HashSet<string>();
 
         foreach (Word firstWord in allWords)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (!CanUseWord(
                     inputLetters,
                     firstWord.WordLetterCount))
@@ -128,7 +122,6 @@ public class AnagramSolverService : IAnagramSolver
                 SubtractLetters(
                     inputLetters,
                     firstWord.WordLetterCount);
-
             IEnumerable<Word> possibleSecondWords =
                 allWords.Where(secondWord =>
                     CanUseWord(
@@ -137,6 +130,7 @@ public class AnagramSolverService : IAnagramSolver
 
             foreach (Word secondWord in possibleSecondWords)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 Dictionary<char, int> afterSecondWord =
                     SubtractLetters(
                         afterFirstWord,
@@ -164,10 +158,8 @@ public class AnagramSolverService : IAnagramSolver
                 }
             }
         }
-
         return results;
     }
-
     private bool CanUseWord(
         Dictionary<char, int> availableLetters,
         Dictionary<char, int> requiredLetters)
@@ -179,7 +171,6 @@ public class AnagramSolverService : IAnagramSolver
             &&
             availableCount >= requiredLetter.Value);
     }
-
     private Dictionary<char, int> SubtractLetters(
         Dictionary<char, int> availableLetters,
         Dictionary<char, int> usedLetters)
@@ -198,10 +189,8 @@ public class AnagramSolverService : IAnagramSolver
                     usedLetter.Key);
             }
         }
-
         return remainingLetters;
     }
-
     private bool UsesAllRemainingLetters(
         Word word,
         Dictionary<char, int> remainingLetters)
@@ -217,10 +206,8 @@ public class AnagramSolverService : IAnagramSolver
             SubtractLetters(
                 remainingLetters,
                 word.WordLetterCount);
-
         return lettersAfterWord.Count == 0;
     }
-
     private bool DictionariesAreEqual(
         Dictionary<char, int> first,
         Dictionary<char, int> second)
@@ -234,7 +221,6 @@ public class AnagramSolverService : IAnagramSolver
                 &&
                 secondValue == pair.Value);
     }
-
     private string FormatTwoWords(
         Word firstWord,
         Word secondWord)
@@ -248,11 +234,9 @@ public class AnagramSolverService : IAnagramSolver
         Word? adjective =
             words.FirstOrDefault(word =>
                 word.Type == SupportedWordTypes.Adjective);
-
         Word? noun =
             words.FirstOrDefault(word =>
                 word.Type == SupportedWordTypes.Noun);
-
         Word? verb =
             words.FirstOrDefault(word =>
                 word.Type == SupportedWordTypes.Verb);
@@ -274,7 +258,6 @@ public class AnagramSolverService : IAnagramSolver
 
         return $"{firstWord.Text} {secondWord.Text}";
     }
-
     private bool TryFormatThreeWords(
         Word firstWord,
         Word secondWord,
@@ -287,7 +270,6 @@ public class AnagramSolverService : IAnagramSolver
             secondWord,
             thirdWord
         };
-
         Dictionary<string, List<Word>> wordsByType =
             words
                 .GroupBy(word => word.Type)
@@ -301,14 +283,12 @@ public class AnagramSolverService : IAnagramSolver
                 out List<Word>? adjectives)
             &&
             adjectives.Count == 1;
-
         bool hasExactlyOneNoun =
             wordsByType.TryGetValue(
                 SupportedWordTypes.Noun,
                 out List<Word>? nouns)
             &&
             nouns.Count == 1;
-
         bool hasExactlyOneVerb =
             wordsByType.TryGetValue(
                 SupportedWordTypes.Verb,
@@ -328,7 +308,6 @@ public class AnagramSolverService : IAnagramSolver
             $"{adjectives![0].Text} " +
             $"{nouns![0].Text} " +
             $"{verbs![0].Text}";
-
         return true;
     }
 }
