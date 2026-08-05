@@ -17,14 +17,14 @@ public class AnagramsController : ControllerBase
     }
 
     [HttpGet("{word}")]
-    public async Task<ActionResult<IReadOnlyCollection<string>>> GetAnagramsAsync(
+    public async Task<ActionResult<IReadOnlyCollection<string>>> GetAnagramsAsync(string searchText,
         string word,
         CancellationToken cancellationToken
     )
     {
         var stopwatch = Stopwatch.StartNew();
         var wordDictionary = LetterCounter.CountLetters(word);
-        var anagrams = await _anagramSolver.GetAnagramsAsync(wordDictionary, cancellationToken);
+        var anagrams = await _anagramSolver.GetAnagramsAsync(searchText,wordDictionary, cancellationToken);
         stopwatch.Stop();
         Response.Headers.Append("X-Anagram-Count", anagrams.Count().ToString());
         Response.Headers.Append("X-Search-Duration-Ms", stopwatch.ElapsedMilliseconds.ToString());

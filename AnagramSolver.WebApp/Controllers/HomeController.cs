@@ -50,6 +50,7 @@ public class HomeController : Controller
                 LetterCounter.CountLetters(id);
             model.Anagrams =
                 await _anagramSolver.GetAnagramsAsync(
+                    id,
                     idToDictionary,
                     cancellationToken);
         }

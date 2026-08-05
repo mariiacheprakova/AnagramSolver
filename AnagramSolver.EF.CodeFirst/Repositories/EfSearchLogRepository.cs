@@ -2,7 +2,7 @@
 using AnagramSolver.EF.CodeFirst.Data;
 using AnagramSolver.EF.CodeFirst.Models;
 
-namespace AnagramSolver.BusinessLogic.Repositories;
+namespace AnagramSolver.EF.CodeFirst.Repositories;
 public class EfSearchLogRepository : ISearchLogRepository
 {
     private readonly AnagramDbContext _context;
@@ -16,6 +16,18 @@ public class EfSearchLogRepository : ISearchLogRepository
         int resultCount,
         CancellationToken cancellationToken = default)
     {
+        if(string.IsNullOrWhiteSpace(searchText))
+        {
+            throw new ArgumentException(
+                "Search text cannot be empty.",
+                nameof(searchText));
+        }
+
+        if(resultCount < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(resultCount));
+        }
+
         var searchLog = new SearchLog
         {
             SearchText = searchText,

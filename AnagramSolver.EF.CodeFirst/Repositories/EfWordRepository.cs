@@ -2,14 +2,10 @@
 using AnagramSolver.Contracts.Models;
 using AnagramSolver.EF.CodeFirst.Data;
 using Microsoft.EntityFrameworkCore;
+using DomainWord = AnagramSolver.Contracts.Models.Word;
+using EfWord = AnagramSolver.EF.CodeFirst.Models.Word;
 
-using DomainWord =
-    AnagramSolver.Contracts.Models.Word;
-
-using EfWord =
-    AnagramSolver.EF.CodeFirst.Models.Word;
-
-namespace AnagramSolver.BusinessLogic.Repositories;
+namespace AnagramSolver.EF.CodeFirst.Repositories;
 public class EfWordRepository : IWordRepository
 {
     private readonly AnagramDbContext _context;

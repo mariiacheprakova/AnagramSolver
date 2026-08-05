@@ -1,48 +1,61 @@
 ﻿using AnagramSolver.Contracts;
 using AnagramSolver.Contracts.Models;
+using AnagramSolver.EF.CodeFirst.Repositories;
 
 namespace AnagramSolver.BusinessLogic;
 public class AnagramSolverService : IAnagramSolver
 {
     private readonly IWordRepository _wordRepository;
     private readonly IWordFilter _filterChain;
-    //private readonly ISearchLogRepository _searchLogRepository;
+    private readonly ISearchLogRepository _searchLogRepository;
 
     public AnagramSolverService(
         IWordRepository wordRepository,
-        IWordFilter filterChain)
-        //ISearchLogRepository searchLogRepository)
+        IWordFilter filterChain,
+        ISearchLogRepository searchLogRepository)
     {
         _wordRepository = wordRepository;
         _filterChain = filterChain;
-        //_searchLogRepository = searchLogRepository;
+        _searchLogRepository = searchLogRepository;
     }
     public async Task<IReadOnlyCollection<string>> GetAnagramsAsync(
-        Dictionary<char, int> userInputDictionary,
-        CancellationToken cancellationToken = default)
+    string searchText,
+    Dictionary<char, int> userInputDictionary,
+    CancellationToken cancellationToken = default)
     {
         Word[] loadedWords =
-            await _wordRepository.GetAllWordsAsync(cancellationToken);
+            await _wordRepository.GetAllWordsAsync(
+                cancellationToken);
 
         cancellationToken.ThrowIfCancellationRequested();
+
         Word[] supportedWords =
             GetSupportedWords(
                 loadedWords,
                 userInputDictionary);
-        return FindOneWordAnagrams(
-                userInputDictionary,
-                supportedWords)
-            .Union(
-                FindTwoWordAnagrams(
+
+        HashSet<string> results =
+            FindOneWordAnagrams(
                     userInputDictionary,
-                    supportedWords,
-                    cancellationToken))
-            .Union(
-                FindThreeWordAnagrams(
-                    userInputDictionary,
-                    supportedWords,
-                    cancellationToken))
-            .ToHashSet();
+                    supportedWords)
+                .Union(
+                    FindTwoWordAnagrams(
+                        userInputDictionary,
+                        supportedWords,
+                        cancellationToken))
+                .Union(
+                    FindThreeWordAnagrams(
+                        userInputDictionary,
+                        supportedWords,
+                        cancellationToken))
+                .ToHashSet();
+
+        await _searchLogRepository.AddAsync(
+            searchText,
+            results.Count,
+            cancellationToken);
+
+        return results;
     }
     private Word[] GetSupportedWords(
         Word[] loadedWords,

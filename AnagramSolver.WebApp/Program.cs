@@ -1,15 +1,15 @@
 using AnagramSolver.BusinessLogic;
-using AnagramSolver.BusinessLogic.Decorators;
+using AnagramSolver.EF.CodeFirst.Repositories;
 using AnagramSolver.BusinessLogic.Filters;
-using AnagramSolver.BusinessLogic.Repositories;
 using AnagramSolver.Contracts;
 using AnagramSolver.Contracts.Models;
 using AnagramSolver.EF.CodeFirst.Data;
-using AnagramSolver.EF.CodeFirst.Import;
 using Microsoft.EntityFrameworkCore;
 using ILogger = AnagramSolver.Contracts.ILogger;
+using AnagramSolver.BusinessLogic.Decorators;
 
 var builder = WebApplication.CreateBuilder(args);
+
 AnagramSettings settings =
     builder.Configuration
         .GetSection("AnagramSettings")
@@ -27,7 +27,6 @@ builder.Services.AddSingleton<
 builder.Services.AddSingleton<
     ILogger,
     Logging>();
-builder.Services.AddScoped<IWordRepository, FileWordRepository>();
 builder.Services.AddScoped<IAnagramSolver>(
     serviceProvider =>
     {
@@ -37,6 +36,9 @@ builder.Services.AddScoped<IAnagramSolver>(
         ILogger logger =
             serviceProvider.GetRequiredService<
                 ILogger>();
+        ISearchLogRepository searchLogRepository =
+    serviceProvider.GetRequiredService<
+        ISearchLogRepository>();
         MemoryCache<IReadOnlyCollection<string>> cache =
             serviceProvider.GetRequiredService<
                 MemoryCache<IReadOnlyCollection<string>>>();
@@ -56,7 +58,8 @@ builder.Services.AddScoped<IAnagramSolver>(
     IAnagramSolver solver =
         new AnagramSolverService(
             repository,
-            lengthFilter);
+            lengthFilter,
+            searchLogRepository);
         solver =
             new CacheDecorator(
                 solver,
@@ -69,16 +72,13 @@ builder.Services.AddScoped<IAnagramSolver>(
         return solver;
     });
 
+builder.Services.AddScoped<IWordRepository, EfWordRepository>();
+builder.Services.AddDbContext<AnagramDbContext>(options => options.UseSqlServer(
+    builder.Configuration.GetConnectionString(
+        "AnagramDatabase")));
+builder.Services.AddScoped<ISearchLogRepository,EfSearchLogRepository>();
 var app =
     builder.Build();
-await using (AsyncServiceScope scope =
-    app.Services.CreateAsyncScope())
-{
-    var dictionaryPath =
-        Path.Combine(
-            app.Environment.ContentRootPath,
-            "zodynas.txt");
-}
 
 if (app.Environment.IsDevelopment())
 {

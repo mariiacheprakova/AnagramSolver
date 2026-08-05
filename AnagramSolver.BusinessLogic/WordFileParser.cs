@@ -1,4 +1,5 @@
 ﻿using AnagramSolver.Contracts.Models;
+using AnagramSolver.Contracts;
 
 namespace AnagramSolver.BusinessLogic;
 
