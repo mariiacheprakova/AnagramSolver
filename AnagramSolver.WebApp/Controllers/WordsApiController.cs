@@ -86,7 +86,6 @@ public class WordsApiController : ControllerBase
             return NotFound();
         }
         _cache.Clear();
-
         return NoContent();
     }
 }

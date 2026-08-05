@@ -1,16 +1,9 @@
-﻿using System;
-using System.Data.Common;
-using System.Text.RegularExpressions;
-
-class Program
+﻿class Program
 {
-
-
     record Student(int Id, string Name, int GroupId);
     record Groupings(int Id, string Name);
     public static void Main(string[] args)
     {
-
         var words = new List<string>
         { "alus", "sula", "la", "vanduo", "programavimas",
           "katinas", "saulė", "medis", "oras", "knyga" };
@@ -36,12 +29,11 @@ class Program
         //7.Patikrinti ar visi žodžiai turi bent 1 simbolį
         bool allWordsHaveAtLeastOneCharacter = words.All(w => w.Length >= 1);
 
-
         // Task 2
         var numbers = Enumerable.Range(1, 100).ToList();
 
         //1.Rasti visus lyginius skaičius
-        var neatNumbers = numbers.Where(n => n % 2 == 0).ToList();
+        var evenNumbers = numbers.Where(n => n % 2 == 0).ToList();
 
         //2.Rasti nelyginių skaičių sumą
         var oddNumbersSum = numbers.Where(n => n % 2 != 0).Sum();
@@ -53,7 +45,10 @@ class Program
         var groups = numbers.GroupBy(n => n <= 33 ? "small" : n <= 66 ? "Medium" : "Large").ToList();
 
         //5.Sukurti Dictionary: raktas = skaičius, reikšmė = ar pirminis
-        var dictionary = numbers.ToDictionary(n => n, n => n != 0);
+        var primeDict = numbers.ToDictionary(n => n,
+            n => n > 1 &&
+            Enumerable.Range(2,(int)Math.Sqrt(n)-1)
+            .All(d=> n%d != 0));
 
         var sentences = new List<string>
         { "LINQ yra galingas", "C# yra puiki kalba", "Generics ir Delegates" };
@@ -64,13 +59,10 @@ class Program
         //2.Rasti unikalius žodžius
         var uniqueWords = wordsSeparated.Distinct();
 
-
         //3.Suskaičiuoti kiek kartų kiekvienas žodis pasikartoja\
         var wordsRepeated = wordsSeparated.CountBy(w => w);
 
         // Task 3
-
-
         var students = new List<Student>
         {
             new(1, "Alice", 1),
@@ -90,33 +82,63 @@ class Program
             };
 
         //1.Sujungti studentus su grupėmis naudojant Join
-        var results = students.Join(groupings, s => s.GroupId, g => g.Id, (s, g) =>  new
-        {studentName = s.Name, groupName = g.Name}); 
+        var results = students.Join
+            (groupings,
+            s => s.GroupId,
+            g => g.Id,
+            (s, g) =>  new
+            {
+                studentName = s.Name,
+                groupName = g.Name
+            })
+            .ToList();
 
         //2.Išvesti "Studentas X yra grupėje Y"
-        var student = results.First(r => r.studentName == "David");
-        Console.WriteLine($" Student{student.studentName} is in group {student.groupName}");
+        results.ForEach(r =>
+            Console.WriteLine($"Student {r.studentName} is in group {r.groupName}"));
 
         //3.Rasti grupes su daugiau nei 2 studentais(GroupJoin)
-        var twoStudentsGroups = groupings.GroupJoin(students, g => g.Id, s => s.GroupId, (g, s) => new { Groups = g, Students = s }).Where(g => g.Students.Count() > 2);
+        var groupsWithMoreThanTwoStudents = groupings
+            .GroupJoin(
+            students,
+            g => g.Id,
+            s => s.GroupId,
+            (g, s) => new 
+            { 
+                Group = g,
+                Students = s
+            })
+            .Where(g => g.Students.Count() > 2)
+            .ToList();
 
+        groupsWithMoreThanTwoStudents.ForEach(r =>
+        {
+            Console.WriteLine($"Group: {r.Group.Name}");
+
+           foreach(var student in r.Students)
+            {
+                Console.WriteLine($" - {student.Name}");
+            }
+        });
 
         //Task 5
+        //Some LINQ methods are deferred which means that the query is not executed when it;s constructed
+        //and gets evaluated only while results are being iterated over (f.e Where,Select,OrderBy etc..)
+        //but methods such ToList(), First(), ToDictionary(), aggregation methods produce outcomes immediately
 
         var numbs = new List<int> { 1, 2, 3, 4, 5 };
-        var query = numbs.Where(n => n % 2 != 0); 
-        numbs.AddRange(new[] {30,22,11});
+        var query = numbs.Where(n => n % 2 != 0); // here we utilise Where and it;s a deferred method
+        numbs.AddRange(new[] {30,22,11}); // modyfying the source before execution
         foreach(var number in query)
         {
-            Console.WriteLine(number);
+            Console.WriteLine(number); // query executes during enumeration
         }
         var numbsWithoutQuery = new List<int> { 1, 2, 3, 4, 5 };
-        var q = numbsWithoutQuery.Where(n => n % 2 != 0).ToList();
-        numbsWithoutQuery.AddRange([20, 11, 2]);
+        var q = numbsWithoutQuery.Where(n => n % 2 != 0).ToList(); // immediate assessment of query because of ToList() method
+        numbsWithoutQuery.AddRange([20, 41, 7]); // alteration do not affect the immediate results
         foreach(var n in q)
         {
             Console.WriteLine(n);
         }
-
     }
 }
