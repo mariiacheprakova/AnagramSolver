@@ -32,7 +32,6 @@ public class AnagramSolverServiceMockTests
             new AnagramSolverService(
                 _repository.Object,
                 _filterChain.Object);
-
         var input =
             new Dictionary<char, int>();
 
@@ -65,9 +64,9 @@ public class AnagramSolverServiceMockTests
                 {
                     ['d'] = 1,
                     ['o'] = 1,
-                    ['g'] = 1,
-                },
-            },
+                    ['g'] = 1
+                }
+            }
         ];
 
         _repository
@@ -76,6 +75,11 @@ public class AnagramSolverServiceMockTests
                     It.IsAny<CancellationToken>()))
             .ReturnsAsync(words);
 
+        _filterChain
+            .Setup(filter => filter.Handle(
+                It.Is<Word>(word => word.Text == "dog"),
+                It.IsAny<Dictionary<char, int>>()))
+            .Returns(false);
         var solver =
             new AnagramSolverService(
                 _repository.Object,
@@ -84,7 +88,6 @@ public class AnagramSolverServiceMockTests
         // Act
         IReadOnlyCollection<string> result =
             await solver.GetAnagramsAsync(input);
-
         // Assert
         result.Should().BeEmpty();
     }
@@ -110,14 +113,18 @@ public class AnagramSolverServiceMockTests
                 {
                     ['a'] = 1,
                     ['b'] = 1,
-                    ['c'] = 1,
-                },
-            },
+                    ['c'] = 1
+                }
+            }
         ];
         _repository
             .Setup(r => r.GetAllWordsAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(words);
-
+        _filterChain
+            .Setup(filter => filter.Handle(
+                It.Is<Word>(word => word.Text == "cab"),
+                It.IsAny<Dictionary<char, int>>()))
+            .Returns(true);
         var solver =
             new AnagramSolverService(
                 _repository.Object,

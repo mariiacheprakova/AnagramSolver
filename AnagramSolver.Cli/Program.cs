@@ -1,4 +1,4 @@
-﻿using AnagramSolver.BusinessLogic;
+using AnagramSolver.BusinessLogic;
 using AnagramSolver.Contracts;
 using System.Net.Http.Json;
 
@@ -10,14 +10,10 @@ class Program
         ILogger logger = new Logging();
         var settings =
             ConfigurationLoader.LoadAnagramSettings();
-
         var validator =
             new UserInputValidation(settings);
-
         ConsoleConfiguration.ConfigureUtf8Encoding();
-
         string input = ReadValidUserInput();
-
         using var client = new HttpClient
         {
             BaseAddress = new Uri("http://localhost:5053")
@@ -25,12 +21,11 @@ class Program
 
         try
         {
-            string encodedInput = Uri.EscapeDataString(input);
-
+            string encodedInput =
+                Uri.EscapeDataString(input);
             var results =
                 await client.GetFromJsonAsync<List<string>>(
                     $"/api/anagrams/{encodedInput}");
-
             results ??= new List<string>();
 
             if (results.Count == 0)
@@ -42,24 +37,16 @@ class Program
                 logger.Log(
                     $"Found overall {results.Count} anagrams:");
 
-                int countToPrint = Math.Min(
-                    results.Count,
-                    settings.MaxAnagramsCount);
-
+                int countToPrint =
+                    Math.Min(
+                        results.Count,
+                        settings.MaxAnagramsCount);
                 logger.Log(
                     $"Maximum anagrams displayed: {countToPrint}");
 
-                int printedCount = 0;
-
-                foreach (string result in results)
+                foreach (string result in results.Take(countToPrint))
                 {
-                    if (printedCount >= countToPrint)
-                    {
-                        break;
-                    }
-
                     logger.Log(result);
-                    printedCount++;
                 }
             }
         }
@@ -68,16 +55,13 @@ class Program
             logger.Log(
                 $"Could not contact the API: {exception.Message}");
         }
-
         string ReadValidUserInput()
         {
             logger.Log("Enter a phrase:");
-
             logger.Log(
                 $"Only letters and spaces allowed. " +
                 $"Must include at least " +
                 $"{settings.MinimumWordLength} characters.");
-
             string? input = Console.ReadLine();
 
             while (true)

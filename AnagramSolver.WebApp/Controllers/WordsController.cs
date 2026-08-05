@@ -11,34 +11,38 @@ public class WordsController : Controller
     {
         _wordRepository = wordRepository;
     }
-    public async Task<IActionResult> Index(CancellationToken cancellationToken, int page = 1)
+    public async Task<IActionResult> Index(
+        CancellationToken cancellationToken,
+        int page = 1)
     {
-        var allWords = await _wordRepository.GetAllWordsAsync(cancellationToken);
+        var allWords =
+            await _wordRepository.GetAllWordsAsync(cancellationToken);
+
         if (page < 1)
         {
             page = 1;
         }
 
-        int totalPages = (int)Math.Ceiling(allWords.Length / (double)PageSize);
+        int totalPages =
+            (int)Math.Ceiling(allWords.Length / (double)PageSize);
 
         if (totalPages > 0 && page > totalPages)
         {
             page = totalPages;
         }
 
-        var wordsForCurrentPage = allWords
-            .Skip((page - 1) * PageSize)
-            .Take(PageSize)
-            .ToArray();
-
-        var model = new WordsViewModel
-        {
-            Words = wordsForCurrentPage,
-            CurrentPage = page,
-            TotalPages = totalPages
-        };
-
+        var wordsForCurrentPage =
+            allWords
+                .Skip((page - 1) * PageSize)
+                .Take(PageSize)
+                .ToArray();
+        var model =
+            new WordsViewModel
+            {
+                Words = wordsForCurrentPage,
+                CurrentPage = page,
+                TotalPages = totalPages
+            };
         return View(model);
     }
 }
-

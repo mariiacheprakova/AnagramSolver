@@ -1,6 +1,6 @@
-﻿namespace AnagramSolver.WebApp.Models;
+﻿using AnagramSolver.Contracts.Models;
 
-using AnagramSolver.Contracts.Models;
+namespace AnagramSolver.WebApp.Models;
 public class WordsViewModel
 {
     public IReadOnlyCollection<Word> Words { get; set; } = Array.Empty<Word>();
