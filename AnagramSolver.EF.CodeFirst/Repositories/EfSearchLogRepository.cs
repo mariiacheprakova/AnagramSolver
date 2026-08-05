@@ -6,15 +6,11 @@ namespace AnagramSolver.EF.CodeFirst.Repositories;
 public class EfSearchLogRepository : ISearchLogRepository
 {
     private readonly AnagramDbContext _context;
-    public EfSearchLogRepository(
-        AnagramDbContext context)
+    public EfSearchLogRepository(AnagramDbContext context)
     {
         _context = context;
     }
-    public async Task AddAsync(
-        string searchText,
-        int resultCount,
-        CancellationToken cancellationToken = default)
+    public async Task AddAsync(string searchText, int resultCount, CancellationToken cancellationToken = default)
     {
         if(string.IsNullOrWhiteSpace(searchText))
         {

@@ -10,9 +10,7 @@ var options =
             "TrustServerCertificate=True;")
         .Options;
 
-await using var context =
-    new AnagramDbContext(options);
-
+await using var context = new AnagramDbContext(options);
 var longWords =
     await context.Words
         .AsNoTracking()

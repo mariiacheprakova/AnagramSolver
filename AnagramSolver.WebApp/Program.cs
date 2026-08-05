@@ -22,53 +22,26 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSession();
-builder.Services.AddSingleton<
-    MemoryCache<IReadOnlyCollection<string>>>();
-builder.Services.AddSingleton<
-    ILogger,
-    Logging>();
+builder.Services.AddSingleton<MemoryCache<IReadOnlyCollection<string>>>();
+builder.Services.AddSingleton<ILogger,Logging>();
 builder.Services.AddScoped<IAnagramSolver>(
     serviceProvider =>
     {
-        IWordRepository repository =
-            serviceProvider.GetRequiredService<
-                IWordRepository>();
-        ILogger logger =
-            serviceProvider.GetRequiredService<
-                ILogger>();
-        ISearchLogRepository searchLogRepository =
-    serviceProvider.GetRequiredService<
-        ISearchLogRepository>();
-        MemoryCache<IReadOnlyCollection<string>> cache =
-            serviceProvider.GetRequiredService<
-                MemoryCache<IReadOnlyCollection<string>>>();
+        IWordRepository repository = serviceProvider.GetRequiredService<IWordRepository>();
+        ILogger logger = serviceProvider.GetRequiredService<ILogger>();
+        ISearchLogRepository searchLogRepository =serviceProvider.GetRequiredService<ISearchLogRepository>();
+        MemoryCache<IReadOnlyCollection<string>> cache = serviceProvider.GetRequiredService<MemoryCache<IReadOnlyCollection<string>>>();
 
-        var lengthFilter =
-            new LengthFilter();
-        var letterFilter =
-            new LetterFilter();
-        var supportedWordTypeFilter =
-            new SupportedWordTypeFilter();
+        var lengthFilter = new LengthFilter();
+        var letterFilter = new LetterFilter();
+        var supportedWordTypeFilter = new SupportedWordTypeFilter();
 
-        lengthFilter.SetNext(
-            letterFilter);
-        letterFilter.SetNext(
-            supportedWordTypeFilter);
+        lengthFilter.SetNext(letterFilter);
+        letterFilter.SetNext(supportedWordTypeFilter);
 
-    IAnagramSolver solver =
-        new AnagramSolverService(
-            repository,
-            lengthFilter,
-            searchLogRepository);
-        solver =
-            new CacheDecorator(
-                solver,
-                cache);
-        solver =
-            new LoggingDecorator(
-                logger,
-                solver);
-
+        IAnagramSolver solver = new AnagramSolverService(repository, lengthFilter, searchLogRepository);
+        solver = new CacheDecorator(solver,cache);
+        solver = new LoggingDecorator(logger,solver);
         return solver;
     });
 
@@ -77,8 +50,7 @@ builder.Services.AddDbContext<AnagramDbContext>(options => options.UseSqlServer(
     builder.Configuration.GetConnectionString(
         "AnagramDatabase")));
 builder.Services.AddScoped<ISearchLogRepository,EfSearchLogRepository>();
-var app =
-    builder.Build();
+var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {

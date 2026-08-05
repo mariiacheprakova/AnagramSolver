@@ -9,10 +9,7 @@ var options =
             "Trusted_Connection=True;" +
             "TrustServerCertificate=True;")
         .Options;
-await using var context =
-    new AnagramDbContext(options);
-var seeder =
-    new WordDatabaseSeeder(context);
-string dictionaryPath =
-    @"C:\Users\marii\Desktop\projectSolver\AnagramSolver.WebApp\zodynas.txt";
+await using var context = new AnagramDbContext(options);
+var seeder = new WordDatabaseSeeder(context);
+string dictionaryPath = @"C:\Users\marii\Desktop\projectSolver\AnagramSolver.WebApp\zodynas.txt";
 await seeder.ImportAsync(dictionaryPath);
