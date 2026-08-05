@@ -19,23 +19,25 @@ public class AnagramSolverService : IAnagramSolver
     {
         Word[] loadedWords =
             await _wordRepository.GetAllWordsAsync(cancellationToken);
+
         cancellationToken.ThrowIfCancellationRequested();
-        Word[] allWords =
+        Word[] supportedWords =
             GetSupportedWords(
                 loadedWords,
                 userInputDictionary);
-
         return FindOneWordAnagrams(
                 userInputDictionary,
-                allWords)
+                supportedWords)
             .Union(
                 FindTwoWordAnagrams(
                     userInputDictionary,
-                    allWords,cancellationToken))
+                    supportedWords,
+                    cancellationToken))
             .Union(
                 FindThreeWordAnagrams(
                     userInputDictionary,
-                    allWords,cancellationToken))
+                    supportedWords,
+                    cancellationToken))
             .ToHashSet();
     }
     private Word[] GetSupportedWords(
@@ -48,7 +50,7 @@ public class AnagramSolverService : IAnagramSolver
                     word,
                     userInputDictionary))
             .DistinctBy(word =>
-                $"{word.Text}|{word.Type}")
+                (word.Text, word.Type))
             .ToArray();
     }
     private HashSet<string> FindOneWordAnagrams(
@@ -68,97 +70,104 @@ public class AnagramSolverService : IAnagramSolver
         Word[] allWords,
         CancellationToken cancellationToken)
     {
-        var results = new HashSet<string>();
-
-        foreach (Word firstWord in allWords)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            if (!CanUseWord(
-                    inputLetters,
-                    firstWord.WordLetterCount))
-            {
-                continue;
-            }
-    
-            Dictionary<char, int> remainingLetters =
-                SubtractLetters(
-                    inputLetters,
-                    firstWord.WordLetterCount);
-            IEnumerable<Word> matchingSecondWords =
-                allWords.Where(secondWord =>
-                    UsesAllRemainingLetters(
-                        secondWord,
-                        remainingLetters));
-
-            foreach (Word secondWord in matchingSecondWords)
+        return allWords
+            .Where(firstWord =>
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                results.Add(
-                    FormatTwoWords(
-                        firstWord,
-                        secondWord));
-            }
-        }
-        return results;
+
+                return CanUseWord(
+                    inputLetters,
+                    firstWord.WordLetterCount);
+            })
+            .SelectMany(firstWord =>
+            {
+                Dictionary<char, int> remainingLetters =
+                    SubtractLetters(
+                        inputLetters,
+                        firstWord.WordLetterCount);
+
+                return allWords
+                    .Where(secondWord =>
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+
+                        return UsesAllRemainingLetters(
+                            secondWord,
+                            remainingLetters);
+                    })
+                    .Select(secondWord =>
+                        FormatTwoWords(
+                            firstWord,
+                            secondWord));
+            })
+            .ToHashSet();
     }
     private HashSet<string> FindThreeWordAnagrams(
         Dictionary<char, int> inputLetters,
         Word[] allWords,
         CancellationToken cancellationToken)
     {
-        var results = new HashSet<string>();
-
-        foreach (Word firstWord in allWords)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            if (!CanUseWord(
-                    inputLetters,
-                    firstWord.WordLetterCount))
-            {
-                continue;
-            }
-
-            Dictionary<char, int> afterFirstWord =
-                SubtractLetters(
-                    inputLetters,
-                    firstWord.WordLetterCount);
-            IEnumerable<Word> possibleSecondWords =
-                allWords.Where(secondWord =>
-                    CanUseWord(
-                        afterFirstWord,
-                        secondWord.WordLetterCount));
-
-            foreach (Word secondWord in possibleSecondWords)
+        return allWords
+            .Where(firstWord =>
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                Dictionary<char, int> afterSecondWord =
+
+                return CanUseWord(
+                    inputLetters,
+                    firstWord.WordLetterCount);
+            })
+            .SelectMany(firstWord =>
+            {
+                Dictionary<char, int> afterFirstWord =
                     SubtractLetters(
-                        afterFirstWord,
-                        secondWord.WordLetterCount);
+                        inputLetters,
+                        firstWord.WordLetterCount);
 
-                IEnumerable<Word> possibleThirdWords =
-                    allWords.Where(thirdWord =>
-                        UsesAllRemainingLetters(
-                            thirdWord,
-                            afterSecondWord));
-
-                foreach (Word thirdWord in possibleThirdWords)
-                {
-                    bool canFormat =
-                        TryFormatThreeWords(
-                            firstWord,
-                            secondWord,
-                            thirdWord,
-                            out string formattedResult);
-
-                    if (canFormat)
+                return allWords
+                    .Where(secondWord =>
                     {
-                        results.Add(formattedResult);
-                    }
-                }
-            }
-        }
-        return results;
+                        cancellationToken.ThrowIfCancellationRequested();
+
+                        return CanUseWord(
+                            afterFirstWord,
+                            secondWord.WordLetterCount);
+                    })
+                    .SelectMany(secondWord =>
+                    {
+                        Dictionary<char, int> afterSecondWord =
+                            SubtractLetters(
+                                afterFirstWord,
+                                secondWord.WordLetterCount);
+
+                        return allWords
+                            .Where(thirdWord =>
+                            {
+                                cancellationToken.ThrowIfCancellationRequested();
+
+                                return UsesAllRemainingLetters(
+                                    thirdWord,
+                                    afterSecondWord);
+                            })
+                            .Select(thirdWord =>
+                            {
+                                bool canFormat =
+                                    TryFormatThreeWords(
+                                        firstWord,
+                                        secondWord,
+                                        thirdWord,
+                                        out string formattedResult);
+
+                                return new
+                                {
+                                    CanFormat = canFormat,
+                                    FormattedResult = formattedResult
+                                };
+                            });
+                    });
+            })
+            .Where(result => result.CanFormat)
+            .Select(result => result.FormattedResult)
+            .ToHashSet();
     }
     private bool CanUseWord(
         Dictionary<char, int> availableLetters,
@@ -177,49 +186,47 @@ public class AnagramSolverService : IAnagramSolver
     {
         var remainingLetters =
             new Dictionary<char, int>(availableLetters);
-
-        foreach (KeyValuePair<char, int> usedLetter in usedLetters)
-        {
-            remainingLetters[usedLetter.Key] -=
-                usedLetter.Value;
-
-            if (remainingLetters[usedLetter.Key] == 0)
+        usedLetters
+            .ToList()
+            .ForEach(usedLetter =>
             {
-                remainingLetters.Remove(
-                    usedLetter.Key);
-            }
-        }
+                remainingLetters[usedLetter.Key] -=
+                    usedLetter.Value;
+
+                if (remainingLetters[usedLetter.Key] == 0)
+                {
+                    remainingLetters.Remove(
+                        usedLetter.Key);
+                }
+            });
+
         return remainingLetters;
     }
     private bool UsesAllRemainingLetters(
         Word word,
         Dictionary<char, int> remainingLetters)
     {
-        if (!CanUseWord(
-                remainingLetters,
-                word.WordLetterCount))
-        {
-            return false;
-        }
-
-        Dictionary<char, int> lettersAfterWord =
-            SubtractLetters(
-                remainingLetters,
-                word.WordLetterCount);
-        return lettersAfterWord.Count == 0;
+        return CanUseWord(
+                   remainingLetters,
+                   word.WordLetterCount)
+               &&
+               SubtractLetters(
+                       remainingLetters,
+                       word.WordLetterCount)
+                   .Count == 0;
     }
     private bool DictionariesAreEqual(
         Dictionary<char, int> first,
         Dictionary<char, int> second)
     {
         return first.Count == second.Count
-            &&
-            first.All(pair =>
-                second.TryGetValue(
-                    pair.Key,
-                    out int secondValue)
-                &&
-                secondValue == pair.Value);
+               &&
+               first.All(pair =>
+                   second.TryGetValue(
+                       pair.Key,
+                       out int secondValue)
+                   &&
+                   secondValue == pair.Value);
     }
     private string FormatTwoWords(
         Word firstWord,
@@ -270,44 +277,25 @@ public class AnagramSolverService : IAnagramSolver
             secondWord,
             thirdWord
         };
-        Dictionary<string, List<Word>> wordsByType =
-            words
-                .GroupBy(word => word.Type)
-                .ToDictionary(
-                    group => group.Key,
-                    group => group.ToList());
 
-        bool hasExactlyOneAdjective =
-            wordsByType.TryGetValue(
-                SupportedWordTypes.Adjective,
-                out List<Word>? adjectives)
-            &&
-            adjectives.Count == 1;
-        bool hasExactlyOneNoun =
-            wordsByType.TryGetValue(
-                SupportedWordTypes.Noun,
-                out List<Word>? nouns)
-            &&
-            nouns.Count == 1;
-        bool hasExactlyOneVerb =
-            wordsByType.TryGetValue(
-                SupportedWordTypes.Verb,
-                out List<Word>? verbs)
-            &&
-            verbs.Count == 1;
+        ILookup<string?, Word> wordsByType =
+            words.ToLookup(word => word.Type);
 
-        if (!hasExactlyOneAdjective
-            || !hasExactlyOneNoun
-            || !hasExactlyOneVerb)
+        if (wordsByType[SupportedWordTypes.Adjective].Count() != 1 ||
+            wordsByType[SupportedWordTypes.Noun].Count() != 1 ||
+            wordsByType[SupportedWordTypes.Verb].Count() != 1)
         {
             formattedResult = string.Empty;
             return false;
         }
-
+        Word adjective =
+            wordsByType[SupportedWordTypes.Adjective].Single();
+        Word noun =
+            wordsByType[SupportedWordTypes.Noun].Single();
+        Word verb =
+            wordsByType[SupportedWordTypes.Verb].Single();
         formattedResult =
-            $"{adjectives![0].Text} " +
-            $"{nouns![0].Text} " +
-            $"{verbs![0].Text}";
+            $"{adjective.Text} {noun.Text} {verb.Text}";
         return true;
     }
 }
