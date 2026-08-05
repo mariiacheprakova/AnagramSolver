@@ -4,8 +4,6 @@ namespace AnagramSolver.BusinessLogic
 {
     public class FormatingUserInput
     {
-        private readonly LetterCounter _letterCounter;
-        public FormatingUserInput(LetterCounter letterCounter) => _letterCounter = letterCounter;
         public string[] StringSeparationByWords(string input)
         {
             return Regex.Split(input, @"[\s,]+");

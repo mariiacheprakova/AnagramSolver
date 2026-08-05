@@ -2,7 +2,6 @@
 using AnagramSolver.Contracts.Models;
 
 namespace AnagramSolver.BusinessLogic;
-
 public class UserInputValidation
 {
     private readonly AnagramSettings _settings;

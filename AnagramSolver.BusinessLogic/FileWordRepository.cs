@@ -36,11 +36,10 @@ public class FileWordRepository : IWordRepository
     {
         Word[] existingWords = await GetAllWordsAsync(cancellationToken);
 
-        bool wordAlreadyExists = existingWords.Any(existingWord => existingWord.Text == word.Text && existingWord.Type == word.Type);
+        var wordAlreadyExists = existingWords.Any(existingWord => existingWord.Text == word.Text && existingWord.Type == word.Type);
         if (wordAlreadyExists)
         {
-            throw new InvalidOperationException($"The word '{word.Text}' with type '{word.Type}' already exists.");
-
+            throw new InvalidOperationException("Word already exists.");
         }
 
         string newLine = $"{word.Text} {word.Type}";
@@ -52,7 +51,10 @@ public class FileWordRepository : IWordRepository
         );
         _cachedWords = null;
 
-        word.Id = existingWords.Length + 1;
+        var maxId = existingWords.Length > 0 ?
+            existingWords.Max(w => w.Id)
+            : 0;
+        word.Id = maxId + 1;
         word.WordLetterCount =
             LetterCounter.CountLetters(word.Text);
         return word;
@@ -69,6 +71,7 @@ public class FileWordRepository : IWordRepository
         {
             return false;
         }
+
         List<string> remainingLines = words
             .Where(word => word.Id != id)
             .Select(word => $"{word.Text} {word.Type}")
@@ -83,3 +86,4 @@ public class FileWordRepository : IWordRepository
         return true;
     }
 }
+
