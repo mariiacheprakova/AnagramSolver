@@ -53,6 +53,7 @@ public class WordsApiController : ControllerBase
     {
         Word addedWord = await _wordRepository.AddWordAsync(word,cancellationToken);
         _cache.Clear();
+
         return CreatedAtAction(
             nameof(GetWordByIdAsync),
             new { id = addedWord.Id },
