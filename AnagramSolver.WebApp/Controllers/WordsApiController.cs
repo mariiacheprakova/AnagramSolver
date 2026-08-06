@@ -11,6 +11,7 @@ public class WordsApiController : ControllerBase
 {
     private readonly IWordRepository _wordRepository;
     private readonly MemoryCache<IReadOnlyCollection<string>> _cache;
+
     public WordsApiController(IWordRepository wordRepository, MemoryCache<IReadOnlyCollection<string>> cache)
     {
         _wordRepository = wordRepository;
@@ -19,18 +20,25 @@ public class WordsApiController : ControllerBase
 
     [HttpGet]
     public async Task<ActionResult<IReadOnlyCollection<Word>>> GetWordsAsync(
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
-        Word[] words =
-            await _wordRepository.GetAllWordsAsync(cancellationToken);
+        var headers = Request.Headers;
+        var method = Request.Method;
+        var path = Request.Path;
+        var query = Request.Query;
+        var ip = HttpContext.Connection.RemoteIpAddress;
+        var cookies = Request.Cookies;
+
+        Word[] words = await _wordRepository.GetAllWordsAsync(cancellationToken);
 
         return Ok(words);
     }
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<Word>> GetWordByIdAsync(
-        int id,
-        CancellationToken cancellationToken)
+            int id,
+            CancellationToken cancellationToken)
     {
         Word? word =
             await _wordRepository.GetWordByIdAsync(
@@ -54,7 +62,9 @@ public class WordsApiController : ControllerBase
             await _wordRepository.AddWordAsync(
                 word,
                 cancellationToken);
+
         _cache.Clear();
+
         return CreatedAtAction(
             nameof(GetWordByIdAsync),
             new { id = addedWord.Id },
