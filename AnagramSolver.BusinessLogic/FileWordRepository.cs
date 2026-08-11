@@ -51,18 +51,12 @@ public class FileWordRepository : IWordRepository
         );
         _cachedWords = null;
 
-        var maxId = existingWords.Length > 0 ?
-            existingWords.Max(w => w.Id)
-            : 0;
+        var maxId = existingWords.Length > 0 ? existingWords.Max(w => w.Id) : 0;
         word.Id = maxId + 1;
-        word.WordLetterCount =
-            LetterCounter.CountLetters(word.Text);
+        word.WordLetterCount = LetterCounter.CountLetters(word.Text);
         return word;
     }
-    public async Task<bool> DeleteWordByIdAsync(
-        int id,
-        CancellationToken cancellationToken = default
-    )
+    public async Task<bool> DeleteWordByIdAsync(int id,CancellationToken cancellationToken = default)
     {
         Word[] words = await GetAllWordsAsync(cancellationToken);
         bool wordExists = words.Any(word => word.Id == id);

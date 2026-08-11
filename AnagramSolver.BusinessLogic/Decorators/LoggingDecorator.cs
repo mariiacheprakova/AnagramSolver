@@ -10,10 +10,10 @@ public class LoggingDecorator : IAnagramSolver
         _logger = logger;
         _inner = inner;
     }
-    public async Task<IReadOnlyCollection<string>> GetAnagramsAsync(string searchText,Dictionary<char, int> userInputDictionary, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyCollection<string>> GetAnagramsAsync(Dictionary<char, int> userInputDictionary, CancellationToken cancellationToken = default)
     {
         _logger.Log("Searching for anagrams...");
-        IReadOnlyCollection<string> result = await _inner.GetAnagramsAsync(searchText,userInputDictionary, cancellationToken);
+        IReadOnlyCollection<string> result = await _inner.GetAnagramsAsync(userInputDictionary, cancellationToken);
         _logger.Log($"Found {result.Count} anagrams");
         return result;
     }

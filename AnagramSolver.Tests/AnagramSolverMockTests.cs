@@ -41,7 +41,7 @@ public class AnagramSolverServiceMockTests
        
         // Act
         IReadOnlyCollection<string> result =
-            await solver.GetAnagramsAsync(searchText,input);
+            await solver.GetAnagramsAsync(input);
 
         // Assert
         result.Should().BeEmpty();
@@ -93,7 +93,7 @@ public class AnagramSolverServiceMockTests
 
         // Act
         IReadOnlyCollection<string> result =
-            await solver.GetAnagramsAsync(searchText,input);
+            await solver.GetAnagramsAsync(input);
         // Assert
         result.Should().BeEmpty();
     }
@@ -139,7 +139,7 @@ public class AnagramSolverServiceMockTests
                 _searchRepository.Object);
 
         // Act
-        var result = await solver.GetAnagramsAsync(searchText,input);
+        var result = await solver.GetAnagramsAsync(input);
 
         // Assert
         Assert.Single(result);

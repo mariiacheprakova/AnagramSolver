@@ -7,12 +7,10 @@ namespace AnagramSolver.EF.CodeFirst.Import;
 public class WordDatabaseSeeder
 {
     private readonly AnagramDbContext _context;
-
     public WordDatabaseSeeder(AnagramDbContext context)
     {
         _context = context;
     }
-
     public async Task ImportAsync(string filePath, CancellationToken cancellationToken = default)
     {
         if (!File.Exists(filePath))
@@ -21,9 +19,7 @@ public class WordDatabaseSeeder
                 $"Dictionary file was not found: {filePath}");
         }
 
-        Dictionary<string, Category> categories =
-            await _context.Categories
-                .ToDictionaryAsync(category => category.Name, cancellationToken);
+        Dictionary<string, Category> categories = await _context.Categories.ToDictionaryAsync(category => category.Name, cancellationToken);
 
         Console.WriteLine("=== Categories ===");
         foreach (var category in categories)
@@ -31,8 +27,7 @@ public class WordDatabaseSeeder
             Console.WriteLine($"{category.Key} -> {category.Value.Id}");
         }
 
-        string[] lines =
-            await File.ReadAllLinesAsync(filePath, cancellationToken);
+        string[] lines = await File.ReadAllLinesAsync(filePath, cancellationToken);
 
         Console.WriteLine("\n=== First 10 dictionary lines ===");
         foreach (string line in lines.Take(10))

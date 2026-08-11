@@ -10,15 +10,8 @@ public class EfSearchLogRepository : ISearchLogRepository
     {
         _context = context;
     }
-    public async Task AddAsync(string searchText, int resultCount, CancellationToken cancellationToken = default)
+    public async Task AddAsync(int resultCount, CancellationToken cancellationToken = default)
     {
-        if(string.IsNullOrWhiteSpace(searchText))
-        {
-            throw new ArgumentException(
-                "Search text cannot be empty.",
-                nameof(searchText));
-        }
-
         if(resultCount < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(resultCount));
@@ -26,7 +19,6 @@ public class EfSearchLogRepository : ISearchLogRepository
 
         var searchLog = new SearchLog
         {
-            SearchText = searchText,
             ResultCount = resultCount,
             SearchedAt = DateTime.UtcNow
         };

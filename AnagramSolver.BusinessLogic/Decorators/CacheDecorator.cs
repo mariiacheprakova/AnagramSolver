@@ -10,7 +10,7 @@ public class CacheDecorator : IAnagramSolver
         _inner = inner;
         _cache = cache;
     }
-    public async Task<IReadOnlyCollection<string>> GetAnagramsAsync(string searchText,Dictionary<char, int> userInputDictionary
+    public async Task<IReadOnlyCollection<string>> GetAnagramsAsync(Dictionary<char, int> userInputDictionary
         , CancellationToken cancellationToken)
     {
         string key = CreateCacheKey(userInputDictionary);
@@ -19,7 +19,7 @@ public class CacheDecorator : IAnagramSolver
             return cachedResult;
         }
 
-        IReadOnlyCollection<string> results = await _inner.GetAnagramsAsync(searchText,userInputDictionary, cancellationToken);
+        IReadOnlyCollection<string> results = await _inner.GetAnagramsAsync(userInputDictionary, cancellationToken);
         _cache.Set(key, results);
         return results;
     }

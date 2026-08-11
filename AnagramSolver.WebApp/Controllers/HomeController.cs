@@ -41,11 +41,7 @@ public class HomeController : Controller
             string updatedHistoryJson = JsonSerializer.Serialize(searchHistory);
             HttpContext.Session.SetString("searchHistory", updatedHistoryJson);
             Dictionary<char, int> idToDictionary = LetterCounter.CountLetters(id);
-            model.Anagrams =
-                await _anagramSolver.GetAnagramsAsync(
-                    id,
-                    idToDictionary,
-                    cancellationToken);
+            model.Anagrams =await _anagramSolver.GetAnagramsAsync(idToDictionary,cancellationToken);
         }
         var lastSearch = Request.Cookies["lastSearch"];
         ViewBag.LastSearch = lastSearch;

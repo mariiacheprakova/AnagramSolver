@@ -11,5 +11,5 @@ var options =
         .Options;
 await using var context = new AnagramDbContext(options);
 var seeder = new WordDatabaseSeeder(context);
-string dictionaryPath = @"C:\Users\marii\Desktop\projectSolver\AnagramSolver.WebApp\zodynas.txt";
+string dictionaryPath = Path.Combine(Directory.GetCurrentDirectory(), "AnagramSolver.WebApp", "zodynas.txt");
 await seeder.ImportAsync(dictionaryPath);
