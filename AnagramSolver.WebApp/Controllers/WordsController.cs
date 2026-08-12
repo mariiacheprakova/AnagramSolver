@@ -11,20 +11,16 @@ public class WordsController : Controller
     {
         _wordRepository = wordRepository;
     }
-    public async Task<IActionResult> Index(
-        CancellationToken cancellationToken,
-        int page = 1)
+    public async Task<IActionResult> Index(CancellationToken cancellationToken, int page = 1)
     {
-        var allWords =
-            await _wordRepository.GetAllWordsAsync(cancellationToken);
+        var allWords = await _wordRepository.GetAllWordsAsync(cancellationToken);
 
         if (page < 1)
         {
             page = 1;
         }
 
-        int totalPages =
-            (int)Math.Ceiling(allWords.Length / (double)PageSize);
+        int totalPages = (int)Math.Ceiling(allWords.Length / (double)PageSize);
 
         if (totalPages > 0 && page > totalPages)
         {

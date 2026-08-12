@@ -1,5 +1,4 @@
 ﻿using AnagramSolver.Contracts;
-
 namespace AnagramSolver.BusinessLogic;
 public class Logging : ILogger
 {

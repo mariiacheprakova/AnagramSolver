@@ -1,11 +1,15 @@
 using AnagramSolver.BusinessLogic;
-using AnagramSolver.BusinessLogic.Decorators;
+using AnagramSolver.EF.CodeFirst.Repositories;
 using AnagramSolver.BusinessLogic.Filters;
 using AnagramSolver.Contracts;
 using AnagramSolver.Contracts.Models;
+using AnagramSolver.EF.CodeFirst.Data;
+using Microsoft.EntityFrameworkCore;
 using ILogger = AnagramSolver.Contracts.ILogger;
+using AnagramSolver.BusinessLogic.Decorators;
 
 var builder = WebApplication.CreateBuilder(args);
+
 AnagramSettings settings =
     builder.Configuration
         .GetSection("AnagramSettings")
@@ -18,64 +22,35 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSession();
-builder.Services.AddSingleton<
-    MemoryCache<IReadOnlyCollection<string>>>();
-builder.Services.AddSingleton<
-    ILogger,
-    Logging>();
-builder.Services.AddScoped<IWordRepository, FileWordRepository>();
+builder.Services.AddSingleton<MemoryCache<IReadOnlyCollection<string>>>();
+builder.Services.AddSingleton<ILogger,Logging>();
 builder.Services.AddScoped<IAnagramSolver>(
     serviceProvider =>
     {
-        IWordRepository repository =
-            serviceProvider.GetRequiredService<
-                IWordRepository>();
-        ILogger logger =
-            serviceProvider.GetRequiredService<
-                ILogger>();
-        MemoryCache<IReadOnlyCollection<string>> cache =
-            serviceProvider.GetRequiredService<
-                MemoryCache<IReadOnlyCollection<string>>>();
+        IWordRepository repository = serviceProvider.GetRequiredService<IWordRepository>();
+        ILogger logger = serviceProvider.GetRequiredService<ILogger>();
+        ISearchLogRepository searchLogRepository =serviceProvider.GetRequiredService<ISearchLogRepository>();
+        MemoryCache<IReadOnlyCollection<string>> cache = serviceProvider.GetRequiredService<MemoryCache<IReadOnlyCollection<string>>>();
 
-        var lengthFilter =
-            new LengthFilter();
-        var letterFilter =
-            new LetterFilter();
-        var supportedWordTypeFilter =
-            new SupportedWordTypeFilter();
+        var lengthFilter = new LengthFilter();
+        var letterFilter = new LetterFilter();
+        var supportedWordTypeFilter = new SupportedWordTypeFilter();
 
-        lengthFilter.SetNext(
-            letterFilter);
-        letterFilter.SetNext(
-            supportedWordTypeFilter);
+        lengthFilter.SetNext(letterFilter);
+        letterFilter.SetNext(supportedWordTypeFilter);
 
-        IAnagramSolver solver =
-            new AnagramSolverService(
-                repository,
-                lengthFilter);
-
-        solver =
-            new CacheDecorator(
-                solver,
-                cache);
-        solver =
-            new LoggingDecorator(
-                logger,
-                solver);
-
+        IAnagramSolver solver = new AnagramSolverService(repository, lengthFilter, searchLogRepository);
+        solver = new CacheDecorator(solver,cache);
+        solver = new LoggingDecorator(logger,solver);
         return solver;
     });
 
-var app =
-    builder.Build();
-await using (AsyncServiceScope scope =
-    app.Services.CreateAsyncScope())
-{
-    var dictionaryPath =
-        Path.Combine(
-            app.Environment.ContentRootPath,
-            "zodynas.txt");
-}
+builder.Services.AddScoped<IWordRepository, EfWordRepository>();
+builder.Services.AddDbContext<AnagramDbContext>(options => options.UseSqlServer(
+    builder.Configuration.GetConnectionString(
+        "AnagramDatabase")));
+builder.Services.AddScoped<ISearchLogRepository,EfSearchLogRepository>();
+var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {

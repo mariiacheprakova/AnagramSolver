@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using AnagramSolver.BusinessLogic;
 using AnagramSolver.Contracts;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,9 +14,8 @@ public class AnagramsController : ControllerBase
         _anagramSolver = anagramSolver;
 
     }
-
     [HttpGet("{word}")]
-    public async Task<ActionResult<IReadOnlyCollection<string>>> GetAnagramsAsync(
+    public async Task<ActionResult<IReadOnlyCollection<string>>> GetAnagramsAsync(string searchText,
         string word,
         CancellationToken cancellationToken
     )

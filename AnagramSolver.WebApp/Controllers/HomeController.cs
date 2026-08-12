@@ -13,17 +13,14 @@ public class HomeController : Controller
     {
         _anagramSolver = anagramSolver;
     }
-    public async Task<IActionResult> Index(
-        string? id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Index(string? id, CancellationToken cancellationToken)
     {
         var model = new AnagramViewModel
         {
             Input = id
         };
 
-        string? historyJson =
-            HttpContext.Session.GetString("searchHistory");
+        string? historyJson = HttpContext.Session.GetString("searchHistory");
         List<string> searchHistory =
             string.IsNullOrWhiteSpace(historyJson)
                 ? new List<string>()
@@ -41,17 +38,10 @@ public class HomeController : Controller
                 });
 
             searchHistory.Add(id);
-            string updatedHistoryJson =
-                JsonSerializer.Serialize(searchHistory);
-            HttpContext.Session.SetString(
-                "searchHistory",
-                updatedHistoryJson);
-            Dictionary<char, int> idToDictionary =
-                LetterCounter.CountLetters(id);
-            model.Anagrams =
-                await _anagramSolver.GetAnagramsAsync(
-                    idToDictionary,
-                    cancellationToken);
+            string updatedHistoryJson = JsonSerializer.Serialize(searchHistory);
+            HttpContext.Session.SetString("searchHistory", updatedHistoryJson);
+            Dictionary<char, int> idToDictionary = LetterCounter.CountLetters(id);
+            model.Anagrams =await _anagramSolver.GetAnagramsAsync(idToDictionary,cancellationToken);
         }
         var lastSearch = Request.Cookies["lastSearch"];
         ViewBag.LastSearch = lastSearch;

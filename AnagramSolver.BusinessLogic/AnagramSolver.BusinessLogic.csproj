@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="..\AnagramSolver.Contracts\AnagramSolver.Contracts.csproj" />
+    <ProjectReference Include="..\AnagramSolver.EF.CodeFirst\AnagramSolver.EF.CodeFirst.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

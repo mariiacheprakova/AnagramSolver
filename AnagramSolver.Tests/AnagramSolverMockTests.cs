@@ -9,6 +9,7 @@ public class AnagramSolverServiceMockTests
 {
     private readonly Mock<IWordRepository> _repository = new();
     private readonly Mock<IWordFilter> _filterChain = new();
+    private readonly Mock<ISearchLogRepository> _searchRepository = new();
     public AnagramSolverServiceMockTests()
     {
         _filterChain
@@ -31,10 +32,13 @@ public class AnagramSolverServiceMockTests
         var solver =
             new AnagramSolverService(
                 _repository.Object,
-                _filterChain.Object);
+                _filterChain.Object,
+                _searchRepository.Object);
+
+        const string searchText = "";
         var input =
             new Dictionary<char, int>();
-
+       
         // Act
         IReadOnlyCollection<string> result =
             await solver.GetAnagramsAsync(input);
@@ -46,6 +50,7 @@ public class AnagramSolverServiceMockTests
     [Fact]
     public async Task GetAnagramsAsync_ShouldReturnEmpty_WhenNoAnagramsExist()
     {
+        var searchText = "abc";
         // Arrange
         var input = new Dictionary<char, int>
         {
@@ -83,7 +88,8 @@ public class AnagramSolverServiceMockTests
         var solver =
             new AnagramSolverService(
                 _repository.Object,
-                _filterChain.Object);
+                _filterChain.Object,
+                _searchRepository.Object);
 
         // Act
         IReadOnlyCollection<string> result =
@@ -95,6 +101,7 @@ public class AnagramSolverServiceMockTests
     [Fact]
     public async Task GetAnagramsAsync_ShouldReturnOneWordAnagram_WhenExactMatchExists()
     {
+        var searchText = "cab";
         // Arrange
         var input = new Dictionary<char, int>
         {
@@ -128,7 +135,8 @@ public class AnagramSolverServiceMockTests
         var solver =
             new AnagramSolverService(
                 _repository.Object,
-                _filterChain.Object);
+                _filterChain.Object,
+                _searchRepository.Object);
 
         // Act
         var result = await solver.GetAnagramsAsync(input);

@@ -1,4 +1,4 @@
-﻿namespace AnagramSolver.BusinessLogic;
+﻿namespace AnagramSolver.Contracts;
 public static class LetterCounter
 {
     public static Dictionary<char, int> CountLetters(string text)

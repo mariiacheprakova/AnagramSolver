@@ -19,9 +19,7 @@ public class WordsApiController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyCollection<Word>>> GetWordsAsync(
-        CancellationToken cancellationToken
-    )
+    public async Task<ActionResult<IReadOnlyCollection<Word>>> GetWordsAsync(CancellationToken cancellationToken)
     {
         var headers = Request.Headers;
         var method = Request.Method;
@@ -40,10 +38,7 @@ public class WordsApiController : ControllerBase
             int id,
             CancellationToken cancellationToken)
     {
-        Word? word =
-            await _wordRepository.GetWordByIdAsync(
-                id,
-                cancellationToken);
+        Word? word = await _wordRepository.GetWordByIdAsync(id, cancellationToken);
 
         if (word is null)
         {
@@ -54,15 +49,9 @@ public class WordsApiController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Word>> AddWordAsync(
-        Word word,
-        CancellationToken cancellationToken)
+    public async Task<ActionResult<Word>> AddWordAsync(Word word, CancellationToken cancellationToken)
     {
-        Word addedWord =
-            await _wordRepository.AddWordAsync(
-                word,
-                cancellationToken);
-
+        Word addedWord = await _wordRepository.AddWordAsync(word,cancellationToken);
         _cache.Clear();
 
         return CreatedAtAction(
@@ -72,19 +61,15 @@ public class WordsApiController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
-    public async Task<IActionResult> DeleteWordAsync(
-        int id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteWordAsync(int id, CancellationToken cancellationToken)
     {
-        bool deleted =
-            await _wordRepository.DeleteWordByIdAsync(
-                id,
-                cancellationToken);
+        bool deleted = await _wordRepository.DeleteWordByIdAsync(id, cancellationToken);
 
         if (!deleted)
         {
             return NotFound();
         }
+
         _cache.Clear();
         return NoContent();
     }
