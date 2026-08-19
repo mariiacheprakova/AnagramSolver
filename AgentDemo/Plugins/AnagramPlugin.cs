@@ -3,7 +3,7 @@ using System.ComponentModel;
 using AnagramSolver.BusinessLogic;
 using AnagramSolver.Contracts;
 
-namespace AgentDemo;
+namespace AgentDemo.Plugins;
 
 public class AnagramPlugin(IAnagramSolver anagramSolver, FormatingUserInput formatingUserInput)
 {
@@ -26,6 +26,7 @@ public class AnagramPlugin(IAnagramSolver anagramSolver, FormatingUserInput form
     {
         Console.WriteLine($"[PLUGIN] NumberOfFoundAnagrams got called with {input}");
         var foundAnagrams = await FindAnagrams(input);
+
         return foundAnagrams.Count;
     }
 }

@@ -10,6 +10,7 @@ public class TimePlugin
     public string GetCurrentTime()
     {
         Console.WriteLine("[PLUGIN] GetCurrentTime was called.");
+
         return DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
     }
 }

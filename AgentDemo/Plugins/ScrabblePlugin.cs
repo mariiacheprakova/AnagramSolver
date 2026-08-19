@@ -1,7 +1,7 @@
 ﻿using Microsoft.SemanticKernel;
 using System.ComponentModel;
 
-namespace AgentDemo;
+namespace AgentDemo.Plugins;
 
 public class ScrabblePlugin
 {
