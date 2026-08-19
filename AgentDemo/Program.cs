@@ -1,29 +1,58 @@
-﻿using AgentDemo.Plugins;
+﻿using AgentDemo;
+using AgentDemo.Plugins;
+using AnagramSolver.BusinessLogic;
+using AnagramSolver.Contracts;
+using AnagramSolver.Contracts.Models;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 
 var config = new ConfigurationBuilder()
-.AddUserSecrets<Program>()
-.Build();
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: false)
+    .AddUserSecrets<Program>()
+    .Build();
+
 var builder = Kernel.CreateBuilder();
+
 builder.AddOpenAIChatCompletion(
-modelId: config["OpenAI:Model"]!,
-apiKey: config["OpenAI:ApiKey"]!);
+    modelId: config["OpenAI:Model"],
+    apiKey: config["OpenAI:ApiKey"]);
+
+var anagramSettings = new AnagramSettings();
+
+config.GetSection("AnagramSettings").Bind(anagramSettings);
+builder.Services.AddAnagramSolverServices(anagramSettings);
+builder.Services.AddSingleton<ISearchLogRepository, NoOpSearchLogRepository>();
+
+
+builder.Plugins.AddFromType<TextPlugin>();
+builder.Plugins.AddFromType<TimePlugin>();
+builder.Plugins.AddFromType<AnagramPlugin>();
+
 var kernel = builder.Build();
-kernel.Plugins.AddFromType<TimePlugin>();
-kernel.Plugins.AddFromType<TextPlugin>();
-
-//// Paprastas LLM kvietimas
-//var result = await kernel.InvokePromptAsync(
-//"Kas yra Semantic Kernel? Atsakyk 2 sakiniais.");
-//Console.WriteLine(result);
-
 var chatService = kernel.GetRequiredService<IChatCompletionService>();
 var history = new ChatHistory();
-history.AddSystemMessage("Tu esi draugiškas .NET asistentas.");
+history.AddSystemMessage(
+    """
+    Your role:
+    You are a friendly professional .NET assistent.
 
+    Your capabilities:
+    - You can get current time.
+    - You can count the number of character in a string.
+    - You can transform words to upper case.
+    - You can analyse and finds anagrams.
+
+    Rules:
+    - Use tools that are provided relying on the request type.
+    - If several tools are required, call several.
+    - If there are no suitable tools available, don't invent your own or skip - just notify.
+    - Answer concisely and smoothly in English or Lithuanian captalising on the language that was used in request.
+    """
+);
 var settings = new OpenAIPromptExecutionSettings
 {
     FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
