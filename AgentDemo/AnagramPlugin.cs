@@ -29,3 +29,4 @@ public class AnagramPlugin(IAnagramSolver anagramSolver, FormatingUserInput form
         return foundAnagrams.Count;
     }
 }
+

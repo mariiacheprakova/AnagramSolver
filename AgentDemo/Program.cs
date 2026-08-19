@@ -27,10 +27,11 @@ config.GetSection("AnagramSettings").Bind(anagramSettings);
 builder.Services.AddAnagramSolverServices(anagramSettings);
 builder.Services.AddSingleton<ISearchLogRepository, NoOpSearchLogRepository>();
 
-
 builder.Plugins.AddFromType<TextPlugin>();
 builder.Plugins.AddFromType<TimePlugin>();
 builder.Plugins.AddFromType<AnagramPlugin>();
+builder.Plugins.AddFromType<PalindromePlugin>();
+builder.Plugins.AddFromType<ScrabblePlugin>();
 
 var kernel = builder.Build();
 var chatService = kernel.GetRequiredService<IChatCompletionService>();
@@ -45,6 +46,8 @@ history.AddSystemMessage(
     - You can count the number of character in a string.
     - You can transform words to upper case.
     - You can analyse and finds anagrams.
+    - You can check if found anagram is a palindrome.
+    - You can calculate a scrabble score for each found anagram.
 
     Rules:
     - Use tools that are provided relying on the request type.
@@ -57,7 +60,6 @@ var settings = new OpenAIPromptExecutionSettings
 {
     FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
 };
-
 
 while(true)
 {
@@ -80,3 +82,16 @@ while(true)
     history.AddAssistantMessage(result.Content ?? string.Empty);
 }
 
+//OBSERVATIONS:
+//1. Ką daro agentas, kai neturi tinkamo įrankio užklausai?:
+//Agent apologises and provides info on what it can do. Such as counting characters in a word, finding anagrams,checking if anagram is a palindrome etc..
+
+//2. Kas nutinka, jei plugin funkcija grąžina klaidingą rezultatą?
+//Agent can accept false plugin result as the right one consequently generating wrong outcome.
+
+//3. Kaip agentas elgiasi su dviprasmiška užklausa?
+// Agent might choose the wrong tool to utilise. In the event of ambiguous query it;s better to ask user to supply more lucid and detailed information before executing a plugin function.
+
+//4. Parašykite trumpai(komentaruose arba README): kokias ribotumus pastebėjote ir
+//kaip juos galėtumėte spręsti
+//Limited number of tools and validations, ambiguous queries. Transparency from the user and more thorough plugin functions descriptions can enhance agent's performance. 
