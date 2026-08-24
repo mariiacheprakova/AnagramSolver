@@ -8,10 +8,8 @@ class Program
     static async Task Main(string[] args)
     {
         ILogger logger = new Logging();
-        var settings =
-            ConfigurationLoader.LoadAnagramSettings();
-        var validator =
-            new UserInputValidation(settings);
+        var settings = ConfigurationLoader.LoadAnagramSettings();
+        var validator = new UserInputValidation(settings);
         ConsoleConfiguration.ConfigureUtf8Encoding();
         string input = ReadValidUserInput();
         using var client = new HttpClient
@@ -38,11 +36,8 @@ class Program
                     $"Found overall {results.Count} anagrams:");
 
                 int countToPrint =
-                    Math.Min(
-                        results.Count,
-                        settings.MaxAnagramsCount);
-                logger.Log(
-                    $"Maximum anagrams displayed: {countToPrint}");
+                    Math.Min(results.Count,settings.MaxAnagramsCount);
+                logger.Log($"Maximum anagrams displayed: {countToPrint}");
 
                 foreach (string result in results.Take(countToPrint))
                 {
@@ -52,8 +47,7 @@ class Program
         }
         catch (HttpRequestException exception)
         {
-            logger.Log(
-                $"Could not contact the API: {exception.Message}");
+            logger.Log($"Could not contact the API: {exception.Message}");
         }
         string ReadValidUserInput()
         {
@@ -81,9 +75,7 @@ class Program
                 {
                     logger.Log($"Entered string: {input}");
 
-                    return input!
-                        .Trim()
-                        .ToLower();
+                    return input!.Trim().ToLower();
                 }
 
                 logger.Log("Try again.");

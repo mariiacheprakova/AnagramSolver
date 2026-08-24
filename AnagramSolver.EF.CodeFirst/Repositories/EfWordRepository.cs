@@ -2,18 +2,23 @@
 using AnagramSolver.Contracts.Models;
 using AnagramSolver.EF.CodeFirst.Data;
 using Microsoft.EntityFrameworkCore;
+
 using DomainWord = AnagramSolver.Contracts.Models.Word;
 using EfWord = AnagramSolver.EF.CodeFirst.Models.Word;
+using EfCategory = AnagramSolver.EF.CodeFirst.Models.Category;
 
 namespace AnagramSolver.EF.CodeFirst.Repositories;
+
 public class EfWordRepository : IWordRepository
 {
     private readonly AnagramDbContext _context;
-    public EfWordRepository(AnagramDbContext context)
+    public EfWordRepository(
+        AnagramDbContext context)
     {
         _context = context;
     }
-    public async Task<DomainWord[]> GetAllWordsAsync(CancellationToken cancellationToken = default)
+    public async Task<DomainWord[]> GetAllWordsAsync(
+        CancellationToken cancellationToken = default)
     {
         EfWord[] databaseWords =
             await _context.Words
@@ -22,7 +27,9 @@ public class EfWordRepository : IWordRepository
                 .Where(word => word.IsActive)
                 .ToArrayAsync(cancellationToken);
 
-        return databaseWords.Select(MapToDomainWord).ToArray();
+        return databaseWords
+            .Select(MapToDomainWord)
+            .ToArray();
     }
 
     public async Task<DomainWord?> GetWordByIdAsync(
@@ -36,20 +43,23 @@ public class EfWordRepository : IWordRepository
                 .FirstOrDefaultAsync(
                     word => word.Id == id,
                     cancellationToken);
-
-        return databaseWord is null ? null : MapToDomainWord(databaseWord);
+       
+        return databaseWord is null
+            ? null
+            : MapToDomainWord(databaseWord);
     }
-    public async Task<DomainWord?> AddWordAsync(DomainWord word, CancellationToken cancellationToken = default)
+    public async Task<DomainWord?> AddWordAsync(
+        DomainWord word,
+        CancellationToken cancellationToken = default)
     {
-        int? categoryId =
-            await GetCategoryIdAsync(word.Type,cancellationToken);
-
+        int? categoryId =await GetCategoryIdAsync(word.Type,cancellationToken);
         bool alreadyExists =
             await _context.Words
                 .AnyAsync(
                     existingWord =>
                         existingWord.Value == word.Text
-                        && existingWord.CategoryId == categoryId,
+                        &&
+                        existingWord.CategoryId == categoryId,
                     cancellationToken);
 
         if (alreadyExists)
@@ -58,25 +68,117 @@ public class EfWordRepository : IWordRepository
                 $"The word '{word.Text}' already exists.");
         }
 
-        var databaseWord = new EfWord
-        {
-            Value = word.Text,
-            CategoryId = categoryId,
-            IsActive = true,
-            CreatedAt = DateTime.UtcNow
-        };
+        var databaseWord =
+            new EfWord
+            {
+                Value = word.Text,
+                CategoryId = categoryId,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            };
 
         _context.Words.Add(databaseWord);
-
         await _context.SaveChangesAsync(cancellationToken);
         word.Id = databaseWord.Id;
-        word.WordLetterCount = LetterCounter.CountLetters(word.Text);
+        word.WordLetterCount =LetterCounter.CountLetters(word.Text);
+
         return word;
     }
 
-    public async Task<bool> DeleteWordByIdAsync(int id, CancellationToken cancellationToken = default)
+    public async Task<EfCategory> AddCategoryAsync(
+        string categoryName,
+        CancellationToken cancellationToken = default)
     {
-        EfWord? databaseWord = await _context.Words.FindAsync([id], cancellationToken);
+        bool alreadyExists =
+            await _context.Categories
+                .AnyAsync(
+                    category =>
+                        category.Name == categoryName,
+                    cancellationToken);
+
+        if (alreadyExists)
+        {
+            throw new InvalidOperationException(
+                $"Category '{categoryName}' already exists.");
+        }
+
+        var category =
+            new EfCategory
+            {
+                Name = categoryName
+            };
+
+        _context.Categories.Add(category);
+        await _context.SaveChangesAsync(cancellationToken);
+        return category;
+    }
+
+    public async Task<DomainWord[]> GetWordsByCategoryAsync(
+        string categoryName,
+        CancellationToken cancellationToken = default)
+    {
+        EfWord[] databaseWords =
+            await _context.Words
+                .AsNoTracking()
+                .Include(word => word.Category)
+                .Where(word =>
+                    word.Category != null
+                    &&
+                    word.Category.Name == categoryName)
+                .ToArrayAsync(cancellationToken);
+
+        return databaseWords
+            .Select(MapToDomainWord)
+            .ToArray();
+    }
+
+    public async Task<Dictionary<string, int>>
+        GetWordCountByCategoryAsync(
+            CancellationToken cancellationToken = default)
+    {
+        Dictionary<string, int> result =
+            await _context.Words
+                .Where(word =>
+                    word.Category != null)
+                .GroupBy(word =>
+                    word.Category!.Name)
+                .Select(group => new
+                {
+                    Category = group.Key,
+                    Count = group.Count()
+                })
+                .ToDictionaryAsync(
+                    item => item.Category,
+                    item => item.Count,
+                    cancellationToken);
+
+        return result;
+    }
+
+    public async Task<DomainWord[]>
+        GetWordsWithoutCategoryAsync(
+            CancellationToken cancellationToken = default)
+    {
+        EfWord[] databaseWords =
+            await _context.Words
+                .AsNoTracking()
+                .Include(word => word.Category)
+                .Where(word =>
+                    word.CategoryId == null)
+                .ToArrayAsync(cancellationToken);
+
+        return databaseWords.Select(MapToDomainWord).ToArray();
+    }
+
+    public async Task<bool> DeleteWordByIdAsync(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        EfWord? databaseWord =
+            await _context.Words
+                .FindAsync(
+                    [id],
+                    cancellationToken);
 
         if (databaseWord is null)
         {
@@ -84,10 +186,10 @@ public class EfWordRepository : IWordRepository
         }
 
         _context.Words.Remove(databaseWord);
-        await _context.SaveChangesAsync(
-            cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
+
     private static DomainWord MapToDomainWord(
         EfWord databaseWord)
     {
@@ -95,13 +197,17 @@ public class EfWordRepository : IWordRepository
         {
             Id = databaseWord.Id,
             Text = databaseWord.Value,
-            Type = MapCategoryToWordType(
-                databaseWord.Category?.Name),
-            WordLetterCount =LetterCounter.CountLetters(databaseWord.Value)};
+            Type = MapCategoryToWordType(databaseWord.Category?.Name),
+            WordLetterCount =LetterCounter.CountLetters(databaseWord.Value)
+        };
     }
-    private async Task<int?> GetCategoryIdAsync(string wordType, CancellationToken cancellationToken)
+
+    private async Task<int?> GetCategoryIdAsync(
+        string wordType,
+        CancellationToken cancellationToken)
     {
-        string categoryName = MapWordTypeToCategory(wordType);
+        string categoryName =MapWordTypeToCategory(wordType);
+
         return await _context.Categories
             .Where(category =>
                 category.Name == categoryName)
@@ -110,7 +216,9 @@ public class EfWordRepository : IWordRepository
             .FirstOrDefaultAsync(
                 cancellationToken);
     }
-    private static string MapCategoryToWordType(string? categoryName)
+
+    private static string MapCategoryToWordType(
+        string? categoryName)
     {
         return categoryName switch
         {
@@ -120,14 +228,16 @@ public class EfWordRepository : IWordRepository
             _ => string.Empty
         };
     }
-    private static string MapWordTypeToCategory(string wordType)
+    private static string MapWordTypeToCategory(
+        string wordType)
     {
         return wordType switch
         {
-            SupportedWordTypes.Adjective =>"Adjective",
+            SupportedWordTypes.Adjective => "Adjective",
             SupportedWordTypes.Noun => "Noun",
             SupportedWordTypes.Verb => "Verb",
-            _ => throw new InvalidOperationException($"Unsupported word type '{wordType}'.")
+            _ => throw new InvalidOperationException(
+                $"Unsupported word type '{wordType}'.")
         };
     }
 }

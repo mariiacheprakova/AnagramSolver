@@ -18,22 +18,11 @@ public class AnagramSolverService : IAnagramSolver
         _filterChain = filterChain;
         _searchLogRepository = searchLogRepository;
     }
-    public async Task<IReadOnlyCollection<string>> GetAnagramsAsync(
-    string searchText,
-    Dictionary<char, int> userInputDictionary,
-    CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyCollection<string>> GetAnagramsAsync(Dictionary<char, int> userInputDictionary,CancellationToken cancellationToken = default)
     {
-        Word[] loadedWords =
-            await _wordRepository.GetAllWordsAsync(
-                cancellationToken);
-
+        Word[] loadedWords = await _wordRepository.GetAllWordsAsync(cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
-
-        Word[] supportedWords =
-            GetSupportedWords(
-                loadedWords,
-                userInputDictionary);
-
+        Word[] supportedWords =GetSupportedWords(loadedWords,userInputDictionary);
         HashSet<string> results =
             FindOneWordAnagrams(
                     userInputDictionary,
@@ -50,7 +39,7 @@ public class AnagramSolverService : IAnagramSolver
                         cancellationToken))
                 .ToHashSet();
 
-        await _searchLogRepository.AddAsync(searchText, results.Count, cancellationToken);
+        await _searchLogRepository.AddAsync(results.Count, cancellationToken);
         return results;
     }
     private Word[] GetSupportedWords(
@@ -217,15 +206,9 @@ public class AnagramSolverService : IAnagramSolver
             secondWord
         };
 
-        Word? adjective =
-            words.FirstOrDefault(word =>
-                word.Type == SupportedWordTypes.Adjective);
-        Word? noun =
-            words.FirstOrDefault(word =>
-                word.Type == SupportedWordTypes.Noun);
-        Word? verb =
-            words.FirstOrDefault(word =>
-                word.Type == SupportedWordTypes.Verb);
+        Word? adjective =words.FirstOrDefault(word =>word.Type == SupportedWordTypes.Adjective);
+        Word? noun = words.FirstOrDefault(word =>word.Type == SupportedWordTypes.Noun);
+        Word? verb =words.FirstOrDefault(word =>word.Type == SupportedWordTypes.Verb);
 
         if (adjective is not null && noun is not null)
         {
@@ -268,12 +251,9 @@ public class AnagramSolverService : IAnagramSolver
             return false;
         }
 
-        Word adjective =
-            wordsByType[SupportedWordTypes.Adjective].Single();
-        Word noun =
-            wordsByType[SupportedWordTypes.Noun].Single();
-        Word verb =
-            wordsByType[SupportedWordTypes.Verb].Single();
+        Word adjective = wordsByType[SupportedWordTypes.Adjective].Single();
+        Word noun = wordsByType[SupportedWordTypes.Noun].Single();
+        Word verb = wordsByType[SupportedWordTypes.Verb].Single();
         formattedResult =
             $"{adjective.Text} {noun.Text} {verb.Text}";
         return true;

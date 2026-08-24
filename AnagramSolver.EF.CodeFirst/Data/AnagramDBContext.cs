@@ -14,4 +14,27 @@ public class AnagramDbContext : DbContext
         Set<Category>();
     public DbSet<SearchLog> SearchLogs =>
         Set<SearchLog>();
+
+    protected override void OnModelCreating(
+       ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<Category>().HasData(
+            new Category
+            {
+                Id = 1,
+                Name = "Noun"
+            },
+            new Category
+            {
+                Id = 2,
+                Name = "Verb"
+            },
+            new Category
+            {
+                Id = 3,
+                Name = "Adjective"
+            });
+    }
 }
