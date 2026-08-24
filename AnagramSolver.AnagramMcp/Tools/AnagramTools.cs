@@ -12,7 +12,7 @@ public static class AnagramTools
     public static async Task<IReadOnlyCollection<string>> FindAnagrams(IAnagramSolver anagramSolver, [Description("The word or phrase to find anagrams for")] string text, CancellationToken cancellationToken)
     {
         Dictionary<char, int> userInputDictionary = LetterCounter.CountLetters(text);
-        return await anagramSolver.GetAnagramsAsync(text, userInputDictionary, cancellationToken);
+        return await anagramSolver.GetAnagramsAsync(userInputDictionary, cancellationToken);
     }
 
     [McpServerTool]

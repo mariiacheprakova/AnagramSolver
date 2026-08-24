@@ -7,11 +7,8 @@ public static class WordFileParser
 {
     public static Word[] ParseWords(IList<string> lines)
     {
-        var words = lines
-        .Select(line =>
-        {
-            var parts = line.Split('\t',StringSplitOptions.RemoveEmptyEntries); 
-            return new Word
+        Word[] words = lines
+            .Select((line, lineIndex) =>
             {
                 string[] parts = line.Split(
                     (char[]?)null,

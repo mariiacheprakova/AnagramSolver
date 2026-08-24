@@ -16,7 +16,7 @@ public class AnagramPlugin(IAnagramSolver anagramSolver, FormatingUserInput form
     {
         Console.WriteLine($"[PLUGIN] FindAnagrams called with {input}.");
         var userInputDictionary = _formatingUserInput.CountLetters(input);
-        var foundAnagrams = await _anagramSolver.GetAnagramsAsync(input, userInputDictionary);
+        var foundAnagrams = await _anagramSolver.GetAnagramsAsync(userInputDictionary);
         return foundAnagrams;
     }
 
