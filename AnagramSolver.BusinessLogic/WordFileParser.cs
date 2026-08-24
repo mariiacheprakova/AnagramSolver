@@ -11,7 +11,7 @@ public static class WordFileParser
         var words = lines
         .Select(line =>
         {
-            var parts = line.Split(' ',StringSplitOptions.RemoveEmptyEntries); 
+            var parts = line.Split('\t',StringSplitOptions.RemoveEmptyEntries); 
             return new Word
             {
                 Text = parts[0],
