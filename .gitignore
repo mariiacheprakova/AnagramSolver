@@ -480,3 +480,9 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Python virtual environments (e.g. example-mcp-servers-main/.venv)
+.venv/
+
+# Playwright MCP generated snapshots/screenshots
+.playwright-mcp/

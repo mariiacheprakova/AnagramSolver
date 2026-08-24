@@ -1,0 +1,42 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "."
+      ],
+      "env": {}
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest"
+      ],
+      "env": {}
+    },
+    "anagram": {
+      "type": "stdio",
+      "command": "dotnet",
+      "args": [
+        "AnagramSolver.AnagramMcp/bin/Release/net10.0/AnagramSolver.AnagramMcp.dll"
+      ],
+      "env": {}
+    },
+    "weather": {
+      "type": "stdio",
+      "command": "C:\\Users\\mariia.cheprakova\\AppData\\Roaming\\Python\\Python314\\Scripts\\uv.exe",
+      "args": [
+        "--directory",
+        "example-mcp-servers-main",
+        "run",
+        "weather.py"
+      ],
+      "env": {}
+    }
+  }
+}

@@ -6,6 +6,8 @@
     <File Path="SQLTask3.sql" />
     <File Path="SQLTask4.sql" />
   </Folder>
+  <Project Path="AgentDemo/AgentDemo.csproj" />
+  <Project Path="AnagramSolver.AnagramMcp/AnagramSolver.AnagramMcp.csproj" />
   <Project Path="AnagramSolver.BusinessLogic/AnagramSolver.BusinessLogic.csproj" />
   <Project Path="AnagramSolver.Cli/AnagramSolver.Cli.csproj" />
   <Project Path="AnagramSolver.Contracts/AnagramSolver.Contracts.csproj" />
